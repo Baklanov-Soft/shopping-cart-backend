@@ -3,6 +3,8 @@ import sbt._
 object Dependencies {
 
   object Versions {
+    val apispec = "0.3.2"
+
     val cats       = "2.9.0"
     val catsEffect = "3.4.8"
     val catsRetry  = "3.1.0"
@@ -37,6 +39,10 @@ object Dependencies {
     val weaver = "0.8.1"
   }
 
+  val apispec = Seq(
+    "com.softwaremill.sttp.apispec" %% "openapi-circe-yaml"
+  ).map(_ % Versions.apispec)
+
   val cats       = "org.typelevel"    %% "cats-core"   % Versions.cats
   val catsEffect = "org.typelevel"    %% "cats-effect" % Versions.catsEffect
   val catsRetry  = "com.github.cb372" %% "cats-retry"  % Versions.catsRetry
@@ -61,7 +67,8 @@ object Dependencies {
 
   val http4s = Seq(
     "org.http4s" %% "http4s-core",
-    "org.http4s" %% "http4s-server"
+    "org.http4s" %% "http4s-server",
+    "org.http4s" %% "http4s-ember-server"
   ).map(_ % Versions.http4s)
 
   val log4cats = "org.typelevel" %% "log4cats-core"   % Versions.log4cats
@@ -92,6 +99,7 @@ object Dependencies {
     "com.softwaremill.sttp.tapir" %% "tapir-core",
     "com.softwaremill.sttp.tapir" %% "tapir-json-circe",
     "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs",
+    "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui",
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server",
     "com.softwaremill.sttp.tapir" %% "tapir-newtype",
     "com.softwaremill.sttp.tapir" %% "tapir-refined"

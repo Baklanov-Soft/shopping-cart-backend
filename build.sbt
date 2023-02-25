@@ -17,9 +17,11 @@ lazy val root = (project in file("."))
       Dependencies.catsRetry,
       Dependencies.newtype,
       Dependencies.squants,
+      Dependencies.logback,
       Dependencies.log4cats,
       Dependencies.TestDependencies.scalaTest
     ) ++ Seq(
+      Dependencies.apispec,
       Dependencies.circe,
       Dependencies.http4s,
       Dependencies.tapir
