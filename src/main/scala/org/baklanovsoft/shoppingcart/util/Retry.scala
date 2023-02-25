@@ -6,8 +6,6 @@ import cats.implicits._
 import org.typelevel.log4cats.Logger
 import retry.{RetryDetails, RetryPolicy, retryingOnAllErrors}
 
-import scala.annotation.nowarn
-
 sealed trait Retriable
 
 object Retriable {
@@ -33,17 +31,16 @@ object Retry {
   implicit def forLoggerTemporal[F[_]: Logger: Temporal]: Retry[F] =
     new Retry[F] {
       override def retry[A](policy: RetryPolicy[F], retriable: Retriable)(fa: F[A]): F[A] = {
-        @nowarn
         def onError(e: Throwable, details: RetryDetails): F[Unit] =
           details match {
 
             case RetryDetails.WillDelayAndRetry(_, retriesSoFar, _) =>
-              Logger[F].error(
+              Logger[F].error(e)(
                 s"Failed on ${retriable.show}, retried $retriesSoFar times"
               )
 
             case RetryDetails.GivingUp(totalRetries, _) =>
-              Logger[F].error(
+              Logger[F].error(e)(
                 s"Giving up on ${retriable.show} after $totalRetries retries"
               )
           }
