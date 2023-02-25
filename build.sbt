@@ -10,6 +10,8 @@ lazy val root = (project in file("."))
       "-Ymacro-annotations"
     ),
     libraryDependencies += Dependencies.cats,
+    libraryDependencies += Dependencies.catsRetry,
     libraryDependencies += Dependencies.newtype,
-    libraryDependencies += Dependencies.squants
+    libraryDependencies += Dependencies.squants,
+    libraryDependencies += Dependencies.log4cats
   )
