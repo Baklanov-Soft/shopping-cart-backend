@@ -1,6 +1,7 @@
-package org.baklanovsoft.shoppingcart.service.catalog
+package org.baklanovsoft.shoppingcart.service.payment
 
 import org.baklanovsoft.shoppingcart.model.catalog._
+import org.baklanovsoft.shoppingcart.model.payment.{Cart, CartTotal}
 import org.baklanovsoft.shoppingcart.model.user.UserId
 
 trait ShoppingCartService[F[_]] {
