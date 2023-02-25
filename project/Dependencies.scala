@@ -29,6 +29,7 @@ object Dependencies {
 
     val scalaTest = "3.2.15"
     val scalaMock = "3.6.0"
+    val squants   = "1.8.3"
 
     val tapir          = "1.2.9"
     val testcontainers = "1.17.6"
@@ -84,6 +85,8 @@ object Dependencies {
     "eu.timepit" %% "refined",
     "eu.timepit" %% "refined-pureconfig"
   ).map(_ % Versions.refined)
+
+  val squants = "org.typelevel" %% "squants" % Versions.squants
 
   val tapir = Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core",
