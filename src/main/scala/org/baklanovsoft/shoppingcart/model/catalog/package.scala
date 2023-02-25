@@ -17,6 +17,5 @@ package object catalog {
   @newtype case class ItemDescription(value: String)
 
   @newtype case class Quantity(value: Int)
-  @newtype case class Cart(items: Map[ItemId, Quantity])
 
 }

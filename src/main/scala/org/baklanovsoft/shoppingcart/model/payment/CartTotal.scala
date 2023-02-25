@@ -1,4 +1,4 @@
-package org.baklanovsoft.shoppingcart.model.catalog
+package org.baklanovsoft.shoppingcart.model.payment
 
 import squants.market.Money
 

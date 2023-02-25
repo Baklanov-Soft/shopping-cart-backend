@@ -1,6 +1,5 @@
 package org.baklanovsoft.shoppingcart.model.payment
 
-import org.baklanovsoft.shoppingcart.model.catalog.Cart
 import squants.market.Money
 
 case class Order(
