@@ -3,6 +3,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import squants.market.{EUR, Money}
 import io.circe.syntax._
+import org.baklanovsoft.shoppingcart.util.rest.SquantsCodec
 
 class SquantsCodecSpec extends AnyWordSpec with Matchers with SquantsCodec {
   "Squants money should be encoded and decoded correctly" in {

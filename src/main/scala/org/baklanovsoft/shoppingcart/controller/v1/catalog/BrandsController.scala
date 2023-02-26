@@ -26,9 +26,8 @@ object BrandsController {
   private val base = Routes.base / "brands"
 
   private val get =
-    endpoint
+    endpoint.get
       .in(base)
-      .get
       .out(jsonBody[List[Brand]])
       .tag(tag)
 

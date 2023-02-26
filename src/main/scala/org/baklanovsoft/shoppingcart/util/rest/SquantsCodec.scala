@@ -1,4 +1,4 @@
-package org.baklanovsoft.shoppingcart.util
+package org.baklanovsoft.shoppingcart.util.rest
 
 import io.circe._
 import squants.market.{Currency, Money, defaultMoneyContext}
