@@ -21,7 +21,7 @@ object Main extends IOApp {
 
   private val routes = Routes[IO](brands)
 
-  private val router = Router("/api" -> routes.http4sRoutes).orNotFound
+  private val router = Router("/" -> routes.http4sRoutes).orNotFound
 
   private val server: Resource[IO, Server] =
     EmberServerBuilder
