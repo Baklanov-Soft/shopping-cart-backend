@@ -5,8 +5,9 @@ import sttp.tapir.codec.newtype.TapirCodecNewType
 import sttp.tapir.codec.refined.TapirCodecRefined
 
 trait RestCodecs
-    extends TapirCodecNewType
-    with TapirCodecRefined
-    with CoercibleCodecs
+    extends CoercibleCodecs
     with CirceCodecRefined
+    with RefinedValidateSize
+    with TapirCodecNewType
+    with TapirCodecRefined
     with SquantsCodec

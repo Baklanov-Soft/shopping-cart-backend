@@ -10,9 +10,13 @@ final case class Auth[F[_]: Functor](
     authService: AuthService[F]
 ) {
 
-  def auth(jwtToken: JwtToken): F[Either[(StatusCode, String), User]] =
+  def authWithStatus(jwtToken: JwtToken): F[Either[(StatusCode, String), User]] =
     authService
       .findUser(jwtToken)
       .map(_.fold((StatusCode.Forbidden -> "Forbidden").asLeft[User])(_.asRight))
+
+  def auth(jwtToken: JwtToken): F[Either[Unit, User]] =
+    authWithStatus(jwtToken)
+      .map(_.left.map(_ => ()))
 
 }

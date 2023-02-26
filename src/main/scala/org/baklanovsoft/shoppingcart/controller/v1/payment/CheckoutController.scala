@@ -25,7 +25,7 @@ final case class CheckoutController[F[_]: Sync](checkoutService: CheckoutService
 
   private val checkout =
     CheckoutController.checkout
-      .serverSecurityLogic(auth.auth)
+      .serverSecurityLogic(auth.authWithStatus)
       .serverLogic { user => card =>
         checkoutService
           .process(user.id, card)
