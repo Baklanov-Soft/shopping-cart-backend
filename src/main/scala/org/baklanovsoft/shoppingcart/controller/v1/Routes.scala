@@ -3,6 +3,8 @@ package org.baklanovsoft.shoppingcart.controller.v1
 import cats.implicits._
 import cats.effect.Async
 import org.baklanovsoft.shoppingcart.controller.v1.catalog.BrandsController
+import org.baklanovsoft.shoppingcart.model.user.JwtToken
+import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.apispec.openapi.circe.yaml._
 import sttp.tapir._
 import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
@@ -37,11 +39,15 @@ final case class Routes[F[_]: Async](
     Http4sServerInterpreter[F]().toRoutes(routes) <+> docsRoute
 }
 
-object Routes {
+object Routes extends RestCodecs {
   private val api     = "api"
   private val version = "v1"
   private val title   = "Shopping Cart"
 
   private[v1] val base = api / version
+
+  private[v1] val secureEndpoint =
+    endpoint
+      .securityIn(auth.bearer[JwtToken]())
 
 }

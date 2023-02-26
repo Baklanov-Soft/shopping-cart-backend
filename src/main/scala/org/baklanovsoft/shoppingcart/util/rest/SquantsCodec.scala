@@ -5,7 +5,7 @@ import squants.market.{Currency, Money, defaultMoneyContext}
 import sttp.tapir.Schema
 
 trait SquantsCodec {
-  implicit val c: Codec[Money] = new Codec[Money] {
+  implicit val moneyCodec: Codec[Money] = new Codec[Money] {
     override def apply(a: Money): Json =
       Json.fromJsonObject(
         JsonObject(
@@ -31,7 +31,7 @@ trait SquantsCodec {
   // dummy type to use it's schema as Money schema
   private case class MoneyExample(value: BigDecimal, currency: String)
 
-  implicit val s: Schema[Money] =
+  implicit val moneySchema: Schema[Money] =
     Schema.apply(Schema.derived[MoneyExample].schemaType.as[Money])
 
 }

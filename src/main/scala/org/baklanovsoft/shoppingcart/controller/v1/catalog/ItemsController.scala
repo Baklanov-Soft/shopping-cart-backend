@@ -36,5 +36,6 @@ object ItemsController extends RestCodecs {
       .in(query[Option[BrandParam]]("brandName"))
       .out(jsonBody[List[Item]])
       .tag(tag)
+      .summary("Get all items by brand or all items")
 
 }

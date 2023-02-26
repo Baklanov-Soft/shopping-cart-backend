@@ -30,5 +30,6 @@ object BrandsController {
       .in(base)
       .out(jsonBody[List[Brand]])
       .tag(tag)
+      .summary("Get all brands")
 
 }

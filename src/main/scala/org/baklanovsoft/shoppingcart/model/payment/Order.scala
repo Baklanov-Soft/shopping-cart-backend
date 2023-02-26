@@ -5,6 +5,6 @@ import squants.market.Money
 case class Order(
     id: OrderId,
     pid: PaymentId,
-    items: Cart,
+    items: List[CartItem],
     total: Money
 )
