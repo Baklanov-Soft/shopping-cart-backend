@@ -9,15 +9,16 @@ import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 import sttp.tapir.swagger.{SwaggerUI, SwaggerUIOptions}
 
-case class Routes[F[_]: Async](
+final case class Routes[F[_]: Async](
     brandsController: BrandsController[F]
 ) {
 
   import Routes._
 
-  private val controllers = List(
-    brandsController
-  )
+  private val controllers =
+    List(
+      brandsController
+    )
 
   private val routes =
     controllers

@@ -6,7 +6,7 @@ import org.baklanovsoft.shoppingcart.service.catalog.BrandsService
 import sttp.tapir._
 import sttp.tapir.json.circe._
 
-case class BrandsController[F[_]](
+final case class BrandsController[F[_]](
     brandsService: BrandsService[F]
 ) extends Controller[F] {
 
