@@ -3,7 +3,7 @@ package org.baklanovsoft.shoppingcart.service.payment
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.implicits._
-import org.baklanovsoft.shoppingcart.model.payment.{Card, CartItem, OrderId, Payment, PaymentId}
+import org.baklanovsoft.shoppingcart.model.payment._
 import org.baklanovsoft.shoppingcart.model.user.UserId
 import org.baklanovsoft.shoppingcart.util.{Background, Retriable, Retry}
 import org.typelevel.log4cats.Logger
@@ -19,7 +19,7 @@ final case class CheckoutService[F[_]: MonadThrow: Retry: Background: Logger](
     ordersService: OrdersService[F]
 ) {
 
-  import org.baklanovsoft.shoppingcart.service.payment.CheckoutService._
+  import org.baklanovsoft.shoppingcart.service.payment.CheckoutService.CheckoutError._
 
   private val retryPolicy =
     limitRetries[F](3) |+| exponentialBackoff[F](10.milliseconds)
@@ -85,8 +85,11 @@ final case class CheckoutService[F[_]: MonadThrow: Retry: Background: Logger](
 }
 
 object CheckoutService {
-  case class PaymentError(error: String) extends NoStackTrace
-  case class OrderError(error: String)   extends NoStackTrace
 
-  case object EmptyCartError extends NoStackTrace
+  sealed trait CheckoutError extends NoStackTrace
+  object CheckoutError {
+    case class PaymentError(error: String) extends CheckoutError
+    case class OrderError(error: String)   extends CheckoutError
+    case object EmptyCartError             extends CheckoutError
+  }
 }

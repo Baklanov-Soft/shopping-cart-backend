@@ -4,6 +4,8 @@ import io.estatico.newtype.macros.newtype
 
 import java.util.UUID
 
+/** This object should be imported entirely to get codecs
+  */
 package object catalog {
 
   @newtype case class BrandId(value: UUID)

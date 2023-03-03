@@ -9,9 +9,21 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq(
       "-Ymacro-annotations"
     ),
-    libraryDependencies += Dependencies.cats,
-    libraryDependencies += Dependencies.catsRetry,
-    libraryDependencies += Dependencies.newtype,
-    libraryDependencies += Dependencies.squants,
-    libraryDependencies += Dependencies.log4cats
+    libraryDependencies += compilerPlugin(
+      "org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full
+    ),
+    libraryDependencies ++= Seq(
+      Dependencies.cats,
+      Dependencies.catsRetry,
+      Dependencies.newtype,
+      Dependencies.squants,
+      Dependencies.logback,
+      Dependencies.log4cats,
+      Dependencies.TestDependencies.scalaTest
+    ) ++ Seq(
+      Dependencies.apispec,
+      Dependencies.circe,
+      Dependencies.http4s,
+      Dependencies.tapir
+    ).flatten
   )
