@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  shopping-cart-backend:
+    #build: .
+    image: denisnovac/shopping-cart-backend:test
+    container_name: shopping-card-backend
+    ports:
+      - "8080:8080"
