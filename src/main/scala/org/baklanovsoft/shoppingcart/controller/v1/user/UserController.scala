@@ -3,13 +3,16 @@ package org.baklanovsoft.shoppingcart.controller.v1.user
 import cats.implicits._
 import cats.Functor
 import org.baklanovsoft.shoppingcart.controller.v1.{Auth, Controller, Routes}
-import org.baklanovsoft.shoppingcart.model.user.{CreateUser, JwtToken, LoginUser}
+import org.baklanovsoft.shoppingcart.model.user.{CreateUser, JwtToken, LoginUser, Username}
 import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.model.StatusCode
 import sttp.tapir._
 import sttp.tapir.json.circe.jsonBody
 
 final case class UserController[F[_]: Functor](auth: Auth[F]) extends Controller[F] {
+
+  private val check =
+    UserController.check.serverLogicSuccess(auth.check)
 
   private val login =
     UserController.login.serverLogic { loginUser =>
@@ -37,6 +40,7 @@ final case class UserController[F[_]: Functor](auth: Auth[F]) extends Controller
 
   override val routes = List(
     login,
+    check,
     logout,
     resister
   )
@@ -45,6 +49,15 @@ final case class UserController[F[_]: Functor](auth: Auth[F]) extends Controller
 object UserController extends RestCodecs {
   private val tag  = "Auth"
   private val base = Routes.base / "auth"
+
+  private val check =
+    endpoint.get
+      .in(base / "check")
+      .in(query[Username]("username"))
+      .out(statusCode)
+      .errorOut(statusCode(StatusCode.NotFound).description("No such user found by username"))
+      .tag(tag)
+      .summary("Check user exists")
 
   private val login =
     endpoint.post
