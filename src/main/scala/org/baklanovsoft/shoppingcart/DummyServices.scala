@@ -1,17 +1,26 @@
 package org.baklanovsoft.shoppingcart
 
+import cats.data.NonEmptyList
 import cats.effect._
+import cats.effect.std.Supervisor
 import cats.implicits._
-import org.baklanovsoft.shoppingcart.model.user._
 import org.baklanovsoft.shoppingcart.model.catalog._
-import org.baklanovsoft.shoppingcart.model.health.{AppHealth, Status}
 import org.baklanovsoft.shoppingcart.model.health.AppHealth.{PostgresStatus, RedisStatus}
-import org.baklanovsoft.shoppingcart.model.payment.{CartItem, CartTotal}
-import org.baklanovsoft.shoppingcart.model.user.{User, UserId, Username}
+import org.baklanovsoft.shoppingcart.model.health.{AppHealth, Status}
+import org.baklanovsoft.shoppingcart.model.payment._
+import org.baklanovsoft.shoppingcart.model.user._
 import org.baklanovsoft.shoppingcart.service.catalog.{BrandsService, ItemsService}
 import org.baklanovsoft.shoppingcart.service.health.HealthService
-import org.baklanovsoft.shoppingcart.service.payment.ShoppingCartService
+import org.baklanovsoft.shoppingcart.service.payment.{
+  CheckoutService,
+  OrdersService,
+  PaymentService,
+  ShoppingCartService
+}
 import org.baklanovsoft.shoppingcart.service.user.AuthService
+import org.baklanovsoft.shoppingcart.util.Background
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.slf4j.loggerFactoryforSync
 import squants.market.{Money, USD}
 
 import java.util.UUID
@@ -169,5 +178,57 @@ object DummyServices {
         userId: UserId,
         cart: List[CartItem]
     ): IO[Unit] = refUnsafe.update(_.updated(userId, cart))
+  }
+
+  val paymentService = new PaymentService[IO] {
+    override def process(
+        payment: Payment
+    ): IO[PaymentId] = IO(PaymentId(UUID.randomUUID()))
+  }
+
+  val ordersService = new OrdersService[IO] {
+
+    private val unsafeRef = Ref.unsafe[IO, Map[UserId, List[Order]]](Map.empty)
+
+    override def get(
+        userId: UserId,
+        orderId: OrderId
+    ): IO[Option[Order]] =
+      unsafeRef.get.map(
+        _.get(userId).flatMap(_.find(_.id == orderId))
+      )
+
+    override def findBy(userId: UserId): IO[List[Order]] =
+      unsafeRef.get.map(
+        _.getOrElse(userId, List.empty)
+      )
+
+    override def create(
+        userId: UserId,
+        pid: PaymentId,
+        items: NonEmptyList[CartItem],
+        total: Money
+    ): IO[OrderId] = {
+      val id = OrderId(UUID.randomUUID())
+
+      unsafeRef.update { all =>
+        val o = Order(
+          id,
+          PaymentId(UUID.randomUUID()),
+          items.toList,
+          total
+        )
+
+        all.get(userId).map(_ :+ o).fold(all)(o => all.updated(userId, o))
+
+      } >> id.pure[IO]
+    }
+  }
+
+  def checkoutService(implicit s: Supervisor[IO]) = {
+    implicit val l = LoggerFactory.getLoggerFromName[IO]("Checkout service")
+    implicit val b = Background.bgInstance[IO]
+
+    CheckoutService[IO](paymentService, shoppingCartService, ordersService)
   }
 }

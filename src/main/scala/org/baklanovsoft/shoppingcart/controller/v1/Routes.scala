@@ -4,7 +4,11 @@ import cats.implicits._
 import cats.effect.Async
 import org.baklanovsoft.shoppingcart.controller.v1.catalog.{BrandsController, ItemsController}
 import org.baklanovsoft.shoppingcart.controller.v1.health.HealthController
-import org.baklanovsoft.shoppingcart.controller.v1.payment.ShoppingCartController
+import org.baklanovsoft.shoppingcart.controller.v1.payment.{
+  CheckoutController,
+  OrdersController,
+  ShoppingCartController
+}
 import org.baklanovsoft.shoppingcart.controller.v1.user.UserController
 import org.baklanovsoft.shoppingcart.model.user.JwtToken
 import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
@@ -19,7 +23,9 @@ final case class Routes[F[_]: Async](
     userController: UserController[F],
     brandsController: BrandsController[F],
     itemsController: ItemsController[F],
-    shoppingCartController: ShoppingCartController[F]
+    shoppingCartController: ShoppingCartController[F],
+    ordersController: OrdersController[F],
+    checkoutController: CheckoutController[F]
 ) {
 
   import Routes._
@@ -30,7 +36,9 @@ final case class Routes[F[_]: Async](
       userController,
       brandsController,
       itemsController,
-      shoppingCartController
+      shoppingCartController,
+      ordersController,
+      checkoutController
     )
 
   private val routes =
