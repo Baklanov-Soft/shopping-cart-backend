@@ -4,6 +4,7 @@ import com.comcast.ip4s._
 import org.baklanovsoft.shoppingcart.controller.v1.{Auth, Routes}
 import org.baklanovsoft.shoppingcart.controller.v1.catalog.{BrandsController, ItemsController}
 import org.baklanovsoft.shoppingcart.controller.v1.health.HealthController
+import org.baklanovsoft.shoppingcart.controller.v1.payment.ShoppingCartController
 import org.baklanovsoft.shoppingcart.controller.v1.user.UserController
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
@@ -12,12 +13,15 @@ object Main extends IOApp {
 
   import DummyServices._
 
-  private val brands = BrandsController[IO](brandsService)
-  private val items  = ItemsController[IO](itemsService)
-  private val health = HealthController[IO](healthService)
-  private val user   = UserController[IO](Auth[IO](authService))
+  private val auth = Auth[IO](authService)
 
-  private val routes = Routes[IO](health, user, brands, items)
+  private val brands       = BrandsController[IO](brandsService)
+  private val items        = ItemsController[IO](itemsService)
+  private val health       = HealthController[IO](healthService)
+  private val user         = UserController[IO](auth)
+  private val shoppingCart = ShoppingCartController[IO](auth, shoppingCartService)
+
+  private val routes = Routes[IO](health, user, brands, items, shoppingCart)
 
   private val router = Router("/" -> routes.http4sRoutes).orNotFound
 

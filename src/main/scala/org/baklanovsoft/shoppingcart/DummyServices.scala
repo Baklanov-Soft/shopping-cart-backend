@@ -6,9 +6,11 @@ import org.baklanovsoft.shoppingcart.model.user._
 import org.baklanovsoft.shoppingcart.model.catalog._
 import org.baklanovsoft.shoppingcart.model.health.{AppHealth, Status}
 import org.baklanovsoft.shoppingcart.model.health.AppHealth.{PostgresStatus, RedisStatus}
+import org.baklanovsoft.shoppingcart.model.payment.{CartItem, CartTotal}
 import org.baklanovsoft.shoppingcart.model.user.{User, UserId, Username}
 import org.baklanovsoft.shoppingcart.service.catalog.{BrandsService, ItemsService}
 import org.baklanovsoft.shoppingcart.service.health.HealthService
+import org.baklanovsoft.shoppingcart.service.payment.ShoppingCartService
 import org.baklanovsoft.shoppingcart.service.user.AuthService
 import squants.market.{Money, USD}
 
@@ -102,4 +104,70 @@ object DummyServices {
       else IO(false)
   }
 
+  val shoppingCartService = new ShoppingCartService[IO] {
+
+    private val refUnsafe = Ref.unsafe[IO, Map[UserId, List[CartItem]]](Map.empty)
+
+    private def defaultItem(itemId: ItemId) = Item(
+      itemId,
+      ItemName("test"),
+      ItemDescription("test"),
+      Money(BigDecimal.decimal(100.5), USD),
+      Brand(BrandId(UUID.randomUUID()), BrandName("test brand")),
+      Category(CategoryId(UUID.randomUUID()), CategoryName("test category"))
+    )
+
+    override def add(
+        userId: UserId,
+        itemId: ItemId,
+        quantity: Quantity
+    ): IO[Unit] =
+      refUnsafe.update { allCarts =>
+        val item = CartItem(
+          defaultItem(itemId),
+          quantity
+        )
+
+        val newCart =
+          allCarts
+            .get(userId)
+            .map(cart => cart :+ item)
+            .getOrElse(item :: Nil)
+
+        allCarts.updated(userId, newCart)
+      }
+
+    override def get(
+        userId: UserId
+    ): IO[CartTotal] =
+      refUnsafe.get
+        .map(
+          _.get(userId)
+            .map { items =>
+              val total = items.view.map(i => i.quantity.value * i.item.price.value).sum
+              CartTotal(items, Money(total, USD))
+            }
+            .getOrElse(CartTotal(List.empty, Money(0, USD)))
+        )
+
+    override def delete(userId: UserId): IO[Unit] =
+      refUnsafe.update(_.view.filterKeys(_ != userId).toMap)
+
+    override def removeItem(
+        userId: UserId,
+        itemId: ItemId
+    ): IO[Unit] =
+      refUnsafe.update { m =>
+        m
+          .get(userId)
+          .map(_.filterNot(_.item.uuid == itemId))
+          .map(items => m.updated(userId, items))
+          .getOrElse(m)
+      }
+
+    override def update(
+        userId: UserId,
+        cart: List[CartItem]
+    ): IO[Unit] = refUnsafe.update(_.updated(userId, cart))
+  }
 }
