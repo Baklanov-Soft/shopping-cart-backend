@@ -13,7 +13,7 @@ import sttp.tapir.json.circe._
 
 import scala.annotation.nowarn
 
-final case class CheckoutController[F[_]: Sync](checkoutService: CheckoutService[F], auth: Auth[F])
+final case class CheckoutController[F[_]: Sync](auth: Auth[F], checkoutService: CheckoutService[F])
     extends Controller[F] {
 
   @nowarn // if there is a non-domain error or new error - let it fail with 500

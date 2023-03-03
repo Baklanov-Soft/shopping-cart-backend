@@ -2,7 +2,14 @@ package org.baklanovsoft.shoppingcart.controller.v1
 
 import cats.implicits._
 import cats.effect.Async
-import org.baklanovsoft.shoppingcart.controller.v1.catalog.BrandsController
+import org.baklanovsoft.shoppingcart.controller.v1.catalog.{BrandsController, ItemsController}
+import org.baklanovsoft.shoppingcart.controller.v1.health.HealthController
+import org.baklanovsoft.shoppingcart.controller.v1.payment.{
+  CheckoutController,
+  OrdersController,
+  ShoppingCartController
+}
+import org.baklanovsoft.shoppingcart.controller.v1.user.UserController
 import org.baklanovsoft.shoppingcart.model.user.JwtToken
 import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.apispec.openapi.circe.yaml._
@@ -12,14 +19,26 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 import sttp.tapir.swagger.{SwaggerUI, SwaggerUIOptions}
 
 final case class Routes[F[_]: Async](
-    brandsController: BrandsController[F]
+    healthController: HealthController[F],
+    userController: UserController[F],
+    brandsController: BrandsController[F],
+    itemsController: ItemsController[F],
+    shoppingCartController: ShoppingCartController[F],
+    ordersController: OrdersController[F],
+    checkoutController: CheckoutController[F]
 ) {
 
   import Routes._
 
   private val controllers =
     List(
-      brandsController
+      healthController,
+      userController,
+      brandsController,
+      itemsController,
+      shoppingCartController,
+      ordersController,
+      checkoutController
     )
 
   private val routes =

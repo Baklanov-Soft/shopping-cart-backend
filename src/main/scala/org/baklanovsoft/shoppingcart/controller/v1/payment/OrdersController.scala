@@ -7,7 +7,7 @@ import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.tapir._
 import sttp.tapir.json.circe._
 
-final case class OrdersController[F[_]](ordersService: OrdersService[F], auth: Auth[F]) extends Controller[F] {
+final case class OrdersController[F[_]](auth: Auth[F], ordersService: OrdersService[F]) extends Controller[F] {
 
   private val getAll =
     OrdersController.getAll
