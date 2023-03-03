@@ -17,6 +17,7 @@ class CardCodecSpec extends AnyWordSpec with Matchers with RefinedValidateSize {
 
     /** Type aliases with predicate Size are not working so they should be written explicitly
       */
+    // todo: replace with objects like object SixP extends RefinedTypeOps[Int Refined Size[6], Int]
     val cardNumber = refineV[Size[16]](1234567890123456L).toOption.get
     val cardExp    = refineV[Size[4] And ValidInt]("0101").toOption.get
     val cardCvv    = refineV[Size[3]](123).toOption.get
