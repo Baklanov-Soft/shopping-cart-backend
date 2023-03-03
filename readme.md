@@ -1,20 +1,11 @@
-Routes
+# shopping-cart-backend
 
- - GET /brands
- - POST /brands
- - GET /categories
- - POST /categories
- - GET /items
- - GET /items?brand={name} 
- - POST /items
- - PUT /items
- - GET /cart
- - POST /cart
- - PUT /cart
- - DELETE /cart/{itemId}
- - GET /orders
- - GET /orders/{orderId}
- - POST /checkout
- - POST /auth/users
- - POST /auth/login
- - POST /auth/logout
+Usage:
+`docker-compose up -d`
+
+OpenAPI docs:
+`localhost:8080/api/v1/docs`
+
+Container repo:
+https://hub.docker.com/repository/docker/denisnovac/shopping-cart-backend/general
+
