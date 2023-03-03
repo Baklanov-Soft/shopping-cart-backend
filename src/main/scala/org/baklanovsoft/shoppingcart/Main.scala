@@ -1,25 +1,23 @@
 package org.baklanovsoft.shoppingcart
 import cats.effect._
 import com.comcast.ip4s._
-import org.baklanovsoft.shoppingcart.controller.v1.Routes
-import org.baklanovsoft.shoppingcart.controller.v1.catalog.BrandsController
-import org.baklanovsoft.shoppingcart.model.catalog.{Brand, BrandId, BrandName}
-import org.baklanovsoft.shoppingcart.service.catalog.BrandsService
+import org.baklanovsoft.shoppingcart.controller.v1.{Auth, Routes}
+import org.baklanovsoft.shoppingcart.controller.v1.catalog.{BrandsController, ItemsController}
+import org.baklanovsoft.shoppingcart.controller.v1.health.HealthController
+import org.baklanovsoft.shoppingcart.controller.v1.user.UserController
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
 
-import java.util.UUID
-
 object Main extends IOApp {
 
-  private val dummyService = new BrandsService[IO] {
-    override def findAll: IO[List[Brand]]             = IO.pure(List.empty[Brand])
-    override def create(name: BrandName): IO[BrandId] = IO.pure(BrandId(UUID.randomUUID()))
-  }
+  import DummyServices._
 
-  private val brands = BrandsController[IO](dummyService)
+  private val brands = BrandsController[IO](brandsService)
+  private val items  = ItemsController[IO](itemsService)
+  private val health = HealthController[IO](healthService)
+  private val user   = UserController[IO](Auth[IO](authService))
 
-  private val routes = Routes[IO](brands)
+  private val routes = Routes[IO](health, user, brands, items)
 
   private val router = Router("/" -> routes.http4sRoutes).orNotFound
 
