@@ -11,3 +11,5 @@ trait RestCodecs
     with TapirCodecNewType
     with TapirCodecRefined
     with SquantsCodec
+
+object RestCodecs extends RestCodecs

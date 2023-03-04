@@ -44,9 +44,17 @@ lazy val app =
       ) ++ Seq(
         Dependencies.apispec,
         Dependencies.circe,
+        Dependencies.derevo,
         Dependencies.http4s,
+        Dependencies.pureconfig,
         Dependencies.refined,
         Dependencies.tapir
+      ).flatten
+    )
+    .settings(
+      dependencyOverrides ++= Seq(
+      ) ++ Seq(
+        Dependencies.circe // conflicts with derevo-circe
       ).flatten
     )
     .settings(

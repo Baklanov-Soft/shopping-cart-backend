@@ -11,6 +11,8 @@ object Dependencies {
 
     val circe = "0.14.4"
 
+    val derevo = "0.13.0"
+
     val doobie = "0.13.4"
 
     val flyway = "9.15.1"
@@ -58,6 +60,13 @@ object Dependencies {
     "io.circe" %% "circe-generic",
     "io.circe" %% "circe-refined"
   ).map(_ % Versions.circe)
+
+  val derevo = Seq(
+    "tf.tofu" %% "derevo-core",
+    "tf.tofu" %% "derevo-cats",
+    "tf.tofu" %% "derevo-circe",
+    "tf.tofu" %% "derevo-pureconfig"
+  ).map(_ % Versions.derevo)
 
   val doobie = Seq(
     "org.tpolecat" %% "doobie-core",
@@ -107,7 +116,8 @@ object Dependencies {
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui",
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server",
     "com.softwaremill.sttp.tapir" %% "tapir-newtype",
-    "com.softwaremill.sttp.tapir" %% "tapir-refined"
+    "com.softwaremill.sttp.tapir" %% "tapir-refined",
+    "com.softwaremill.sttp.tapir" %% "tapir-derevo"
   ).map(_ % Versions.tapir)
 
   object TestDependencies {
