@@ -1,15 +1,10 @@
 package org.baklanovsoft.shoppingcart.payment
 
-import derevo.derive
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.boolean.And
 import eu.timepit.refined.collection.Size
 import eu.timepit.refined.string.{MatchesRegex, ValidInt}
-import io.circe.Decoder
 import io.estatico.newtype.macros.newtype
-import org.baklanovsoft.shoppingcart.catalog.model._
-import org.baklanovsoft.shoppingcart.util.rest.RestCodecs._
-import sttp.tapir.derevo.schema
 
 import java.util.UUID
 
@@ -30,13 +25,5 @@ package object model {
   @newtype case class CardNumber(value: CardNumberPred)
   @newtype case class CardExpiration(value: CardExpirationPred)
   @newtype case class CardCVV(value: CardCVVPred)
-
-  @derive(schema)
-  @newtype case class Cart(items: Map[ItemId, Quantity])
-
-  object Cart {
-    implicit val cartDecoder =
-      Decoder.forProduct1("items")(Cart.apply)
-  }
 
 }

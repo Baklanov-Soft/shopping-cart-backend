@@ -2,9 +2,7 @@ package org.baklanovsoft.shoppingcart.catalog
 
 import derevo.circe.magnolia._
 import derevo.derive
-import sttp.tapir.derevo._
 import io.estatico.newtype.macros.newtype
-import org.baklanovsoft.shoppingcart.util.rest.RestCodecs._
 
 import java.util.UUID
 
@@ -18,7 +16,7 @@ package object model {
   @newtype case class CategoryId(value: UUID)
   @newtype case class CategoryName(value: String)
 
-  @derive(decoder, encoder, keyEncoder, keyDecoder, schema)
+  @derive(keyEncoder, keyDecoder)
   @newtype case class ItemId(value: UUID)
 
   @newtype case class ItemName(value: String)
