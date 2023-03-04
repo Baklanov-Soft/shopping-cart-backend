@@ -12,29 +12,6 @@ val assemblyStrategy = assembly / assemblyMergeStrategy := {
     MergeStrategy.first
 }
 
-lazy val root = (project in file("."))
-  .settings(
-    name := "shopping-cart-backend-old",
-    scalacOptions ++= Seq(
-      "-Ymacro-annotations"
-    ),
-    libraryDependencies ++= Dependencies.plugins,
-    libraryDependencies ++= Seq(
-      Dependencies.cats,
-      Dependencies.catsRetry,
-      Dependencies.newtype,
-      Dependencies.squants,
-      Dependencies.logback,
-      Dependencies.log4cats,
-      Dependencies.TestDependencies.scalaTest
-    ) ++ Seq(
-      Dependencies.apispec,
-      Dependencies.circe,
-      Dependencies.http4s,
-      Dependencies.tapir
-    ).flatten
-  )
-
 lazy val app =
   (project in file("./app"))
     .settings(
