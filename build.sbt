@@ -24,7 +24,9 @@ lazy val app =
       // for no main manifest attribute error
       assembly / mainClass := Some("org.baklanovsoft.shoppingcart.Main")
     )
+    .configs(IntegrationTest)
     .settings(
+      Defaults.itSettings,
       scalacOptions ++= Seq(
         "-Ymacro-annotations"
       )

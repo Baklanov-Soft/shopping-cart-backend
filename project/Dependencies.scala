@@ -112,15 +112,15 @@ object Dependencies {
 
   object TestDependencies {
 
-    val testcontainers = "org.testcontainers" % "testcontainers" % Versions.testcontainers % Test
+    val testcontainers = "org.testcontainers" % "testcontainers" % Versions.testcontainers % "it"
 
-    val scalaTest = "org.scalatest" %% "scalatest"      % Versions.scalaTest % Test
-    val scalaMock = "org.scalamock" %% "scalamock-core" % Versions.scalaMock % Test
+    val scalaTest = "org.scalatest" %% "scalatest"      % Versions.scalaTest % "it,test"
+    val scalaMock = "org.scalamock" %% "scalamock-core" % Versions.scalaMock % "it,test"
 
     val weaver = Seq(
       "com.disneystreaming" %% "weaver-core",
       "com.disneystreaming" %% "weaver-cats"
-    ).map(_ % Versions.weaver % Test)
+    ).map(_ % Versions.weaver % "it,test")
   }
 
 }
