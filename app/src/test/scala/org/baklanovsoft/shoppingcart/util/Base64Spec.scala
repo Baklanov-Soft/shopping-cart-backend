@@ -5,7 +5,7 @@ import weaver.SimpleIOSuite
 
 object Base64Spec extends SimpleIOSuite {
 
-  private val instance = Base64.forSync[IO]
+  private val instance = Base64[IO]
 
   test("encode and decode base64") {
     for {

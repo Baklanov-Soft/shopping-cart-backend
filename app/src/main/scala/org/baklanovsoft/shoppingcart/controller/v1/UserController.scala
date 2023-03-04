@@ -1,17 +1,27 @@
 package org.baklanovsoft.shoppingcart.controller.v1
 
-import cats.Functor
+import cats.MonadThrow
+import cats.data.EitherT
 import cats.implicits._
+import org.baklanovsoft.shoppingcart.controller.v1.ControllerDomain.Base64Username
 import org.baklanovsoft.shoppingcart.user.model._
+import org.baklanovsoft.shoppingcart.util.Base64
 import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.model.StatusCode
 import sttp.tapir._
 import sttp.tapir.json.circe.jsonBody
 
-final case class UserController[F[_]: Functor](auth: Auth[F]) extends Controller[F] {
+final case class UserController[F[_]: MonadThrow: Base64](auth: Auth[F]) extends Controller[F] {
 
   private val check =
-    UserController.check.serverLogicSuccess(auth.check)
+    UserController.check.serverLogic { strBase64 =>
+      {
+        for {
+          username <- EitherT(Base64[F].decode(strBase64.value.toString()).attempt).leftMap(_ => StatusCode.BadRequest)
+          code     <- EitherT.liftF[F, StatusCode, StatusCode](auth.check(Username(username)))
+        } yield code
+      }.value
+    }
 
   private val login =
     UserController.login.serverLogic { loginUser =>
@@ -52,9 +62,11 @@ object UserController extends RestCodecs {
   private val check =
     endpoint.get
       .in(base / "check")
-      .in(query[Username]("username"))
+      .in(query[Base64Username]("Base64 username"))
       .out(statusCode)
+      .errorOut(statusCode)
       .errorOut(statusCode(StatusCode.NotFound).description("No such user found by username"))
+      .errorOut(statusCode(StatusCode.BadRequest).description("Base64 decoding error"))
       .tag(tag)
       .summary("Check user exists")
 

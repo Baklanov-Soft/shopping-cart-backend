@@ -5,13 +5,13 @@ import weaver.SimpleIOSuite
 
 object GenUUIDSpec extends SimpleIOSuite {
 
-  private val instance = GenUUID.forSync[IO]
+  private val instance = GenUUID[IO]
 
   test("generate uuid") {
     for {
       uuid <- instance.make
-      _    <- instance.read(uuid.toString)
-    } yield expect(true)
+      read <- instance.read(uuid.toString)
+    } yield expect(uuid == read)
   }
 
   test("read valid uuid") {
