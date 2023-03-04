@@ -60,5 +60,10 @@ lazy val app =
     .settings(
       libraryDependencies ++= Seq(
         Dependencies.TestDependencies.scalaTest
-      )
+      ) ++ Seq(
+        Dependencies.TestDependencies.weaver
+      ).flatten
+    )
+    .settings(
+      testFrameworks += new TestFramework("weaver.framework.CatsEffect")
     )
