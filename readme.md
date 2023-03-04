@@ -13,15 +13,21 @@ https://hub.docker.com/repository/docker/denisnovac/shopping-cart-backend/genera
 
 ## Build
 
-This Scala project is using `sbt-assembly` plugin. To build it run `assembly` in sbt.
+This Scala project is using `sbt-assembly` plugin. To build it run in sbt:
 
-Artifact will be compiled as **JAR** in `target/scala-2.13`.
+```
+sbt:shopping-cart-backend> project app
+sbt:shopping-cart-backend> assembly
+```
+
+Artifact will be compiled as **JAR** in `app/target/scala-2.13`.
 
 Build without sbt/jdk through docker:
 
 ```bash
 docker run -it --rm -v "$(pwd)":/root --network host hseeberger/scala-sbt:eclipse-temurin-17.0.2_1.6.2_2.13.8 sbt
 
+project app
 assembly
 ```
 
