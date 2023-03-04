@@ -11,6 +11,30 @@ OpenAPI docs:
 Container repo:
 https://hub.docker.com/repository/docker/denisnovac/shopping-cart-backend/general
 
+## Test
+
+```
+For unit tests:
+sbt:shopping-cart-backend> test 
+
+For integration tests:
+sbt:shopping-cart-backend> IntegrationTest/test
+```
+
+### Coverage
+
+```
+for unit tests:
+$ sbt clean coverage test
+$ sbt coverageReport
+
+for integration tests:
+$ sbt clean coverage it:test
+$ sbt coverageReport
+```
+
+Report will be in `app/target/scala-2.13/scoverage-report`
+
 ## Build
 
 This Scala project is using `sbt-assembly` plugin. To build it run in sbt:
