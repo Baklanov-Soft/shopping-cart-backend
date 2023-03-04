@@ -8,8 +8,7 @@ import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
 
-object Main
-  extends IOApp {
+object Main extends IOApp {
 
   import DummyServices._
 
