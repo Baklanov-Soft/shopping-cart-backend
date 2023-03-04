@@ -1,14 +1,10 @@
 package org.baklanovsoft.shoppingcart.payment.model
 
-import io.circe.Codec
-import io.circe.generic.semiauto.deriveCodec
+import derevo.circe._
+import derevo.derive
+import sttp.tapir.derevo._
+import org.baklanovsoft.shoppingcart.util.rest.RestCodecs._
 import org.baklanovsoft.shoppingcart.catalog.model._
-import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
-import sttp.tapir.Schema
 
+@derive(codec, schema)
 final case class CartItem(item: Item, quantity: Quantity)
-
-object CartItem extends RestCodecs {
-  implicit val codec: Codec[CartItem]   = deriveCodec
-  implicit val schema: Schema[CartItem] = Schema.derived
-}

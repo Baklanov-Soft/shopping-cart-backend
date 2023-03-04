@@ -8,6 +8,8 @@ import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
 
+import scala.concurrent.duration._
+
 object Main extends IOApp {
 
   import DummyServices._
@@ -29,6 +31,7 @@ object Main extends IOApp {
       .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
       .withHttpApp(router)
+      .withShutdownTimeout(5.seconds)
       .build
   }
 

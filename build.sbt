@@ -44,13 +44,26 @@ lazy val app =
       ) ++ Seq(
         Dependencies.apispec,
         Dependencies.circe,
+        Dependencies.derevo,
         Dependencies.http4s,
+        Dependencies.pureconfig,
         Dependencies.refined,
         Dependencies.tapir
       ).flatten
     )
     .settings(
+      dependencyOverrides ++= Seq(
+      ) ++ Seq(
+        Dependencies.circe // conflicts with derevo-circe
+      ).flatten
+    )
+    .settings(
       libraryDependencies ++= Seq(
         Dependencies.TestDependencies.scalaTest
-      )
+      ) ++ Seq(
+        Dependencies.TestDependencies.weaver
+      ).flatten
+    )
+    .settings(
+      testFrameworks += new TestFramework("weaver.framework.CatsEffect")
     )

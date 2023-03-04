@@ -25,4 +25,5 @@ package object model {
   @newtype case class CardNumber(value: CardNumberPred)
   @newtype case class CardExpiration(value: CardExpirationPred)
   @newtype case class CardCVV(value: CardCVVPred)
+
 }

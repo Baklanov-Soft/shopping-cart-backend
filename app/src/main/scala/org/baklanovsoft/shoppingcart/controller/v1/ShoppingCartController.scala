@@ -4,7 +4,7 @@ import cats.Monad
 import cats.implicits._
 import org.baklanovsoft.shoppingcart.catalog.model.ItemId
 import org.baklanovsoft.shoppingcart.payment.ShoppingCartService
-import org.baklanovsoft.shoppingcart.payment.model.{CartItem, CartTotal}
+import org.baklanovsoft.shoppingcart.payment.model.{Cart, CartTotal}
 import org.baklanovsoft.shoppingcart.user.model.User
 import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.model.StatusCode
@@ -27,12 +27,12 @@ final case class ShoppingCartController[F[_]: Monad](
     ShoppingCartController.addItemToCart
       .serverSecurityLogic[User, F](auth.auth)
       .serverLogicSuccess { (user: User) => body =>
-        body
-          .traverse(i =>
-            shoppingCartService
-              .add(user.id, i.item.uuid, i.quantity)
-          )
-          .void
+        body.items
+          .map { case (id, quantity) =>
+            shoppingCartService.add(user.id, id, quantity)
+          }
+          .toList
+          .sequence *> ().pure[F]
       }
 
   private val modifyItemsInCart =
@@ -73,7 +73,7 @@ object ShoppingCartController extends RestCodecs {
   private val addItemToCart =
     Routes.secureEndpoint.post
       .in(base)
-      .in(jsonBody[List[CartItem]])
+      .in(jsonBody[Cart])
       .out(
         statusCode(StatusCode.Created)
       )
@@ -83,7 +83,7 @@ object ShoppingCartController extends RestCodecs {
   private val modifyItemsInCart =
     Routes.secureEndpoint.put
       .in(base)
-      .in(jsonBody[List[CartItem]])
+      .in(jsonBody[Cart])
       .tag(tag)
       .summary("Modify current user's cart")
 

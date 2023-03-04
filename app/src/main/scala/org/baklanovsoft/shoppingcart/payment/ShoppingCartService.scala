@@ -12,5 +12,5 @@ trait ShoppingCartService[F[_]] {
   def get(userId: UserId): F[CartTotal]
   def delete(userId: UserId): F[Unit]
   def removeItem(userId: UserId, itemId: ItemId): F[Unit]
-  def update(userId: UserId, cart: List[CartItem]): F[Unit]
+  def update(userId: UserId, cart: Cart): F[Unit]
 }
