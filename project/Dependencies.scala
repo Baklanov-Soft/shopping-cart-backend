@@ -39,6 +39,11 @@ object Dependencies {
     val weaver = "0.8.1"
   }
 
+  val plugins = Seq(
+    ("org.typelevel" %% "kind-projector"     % "0.13.2").cross(CrossVersion.full),
+    "com.olegpy"     %% "better-monadic-for" % "0.3.1"
+  ).map(compilerPlugin)
+
   val apispec = Seq(
     "com.softwaremill.sttp.apispec" %% "openapi-circe-yaml"
   ).map(_ % Versions.apispec)
