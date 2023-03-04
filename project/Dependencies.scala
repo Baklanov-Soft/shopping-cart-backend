@@ -65,6 +65,7 @@ object Dependencies {
     "tf.tofu" %% "derevo-core",
     "tf.tofu" %% "derevo-cats",
     "tf.tofu" %% "derevo-circe",
+    "tf.tofu" %% "derevo-circe-magnolia",
     "tf.tofu" %% "derevo-pureconfig"
   ).map(_ % Versions.derevo)
 

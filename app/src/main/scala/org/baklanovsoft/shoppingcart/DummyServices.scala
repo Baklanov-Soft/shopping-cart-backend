@@ -108,16 +108,7 @@ object DummyServices {
 
   val shoppingCartService = new ShoppingCartService[IO] {
 
-    private val refUnsafe = Ref.unsafe[IO, Map[UserId, List[CartItem]]](Map.empty)
-
-    private def defaultItem(itemId: ItemId) = Item(
-      itemId,
-      ItemName("test"),
-      ItemDescription("test"),
-      Money(BigDecimal.decimal(100.5), USD),
-      Brand(BrandId(UUID.randomUUID()), BrandName("test brand")),
-      Category(CategoryId(UUID.randomUUID()), CategoryName("test category"))
-    )
+    private val refUnsafe = Ref.unsafe[IO, Map[UserId, Cart]](Map.empty)
 
     override def add(
         userId: UserId,
@@ -125,32 +116,51 @@ object DummyServices {
         quantity: Quantity
     ): IO[Unit] =
       refUnsafe.update { allCarts =>
-        val item = CartItem(
-          defaultItem(itemId),
-          quantity
-        )
-
-        val newCart =
+        val updatedUserCart =
           allCarts
             .get(userId)
-            .map(cart => cart :+ item)
-            .getOrElse(item :: Nil)
+            .map { cart =>
+              Cart(
+                cart.items
+                  .find(_._1 == itemId)
+                  // if item wasn't here
+                  .fold(cart.items.updated(itemId, quantity)) { case (_, q) =>
+                    // if this item already was here
+                    cart.items.updated(itemId, Quantity(q.value + quantity.value))
+                  }
+              )
 
-        allCarts.updated(userId, newCart)
+            }
+            .getOrElse(Cart(Map(itemId -> quantity))) // if there were no cart before
+
+        allCarts.updated(userId, updatedUserCart)
       }
 
     override def get(
         userId: UserId
     ): IO[CartTotal] =
       refUnsafe.get
-        .map(
-          _.get(userId)
-            .map { items =>
-              val total = items.view.map(i => i.quantity.value * i.item.price.value).sum
-              CartTotal(items, Money(total, USD))
+        .flatMap { ref =>
+          ref
+            .get(userId)
+            .traverse { items =>
+              items.items
+                .map { case (itemId, quantity) =>
+                  itemsService.findById(itemId).map(_.map(i => CartItem(i, quantity)))
+                }
+                .toList
+                .sequence
+                .map(_.flatten)
+                .map { items =>
+                  val totalPrice = items
+                    .map(i => i.item.price.amount * i.quantity.value)
+                    .sum
+
+                  CartTotal(items, Money(totalPrice, USD))
+                }
             }
-            .getOrElse(CartTotal(List.empty, Money(0, USD)))
-        )
+            .map(_.getOrElse(CartTotal(List.empty, Money(0, USD))))
+        }
 
     override def delete(userId: UserId): IO[Unit] =
       refUnsafe.update(_.view.filterKeys(_ != userId).toMap)
@@ -162,14 +172,14 @@ object DummyServices {
       refUnsafe.update { m =>
         m
           .get(userId)
-          .map(_.filterNot(_.item.uuid == itemId))
-          .map(items => m.updated(userId, items))
+          .map(x => x.items.view.filterKeys(_ != itemId).toMap)
+          .map(items => m.updated(userId, Cart(items)))
           .getOrElse(m)
       }
 
     override def update(
         userId: UserId,
-        cart: List[CartItem]
+        cart: Cart
     ): IO[Unit] = refUnsafe.update(_.updated(userId, cart))
   }
 

@@ -12,4 +12,5 @@ trait RestCodecs
     with TapirCodecRefined
     with SquantsCodec
 
+// mark this as always used import in IDEA if needed
 object RestCodecs extends RestCodecs
