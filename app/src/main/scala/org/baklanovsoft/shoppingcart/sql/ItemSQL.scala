@@ -47,7 +47,7 @@ object ItemSQL {
 
   private val selectFragment: Fragment[Void] =
     sql"""
-         SELECT i.uuid, i.name, i.description, i.price
+         SELECT i.uuid, i.name, i.description, i.price,
                 b.uuid, b.name, c.uuid, c.name
          FROM items AS i
          INNER JOIN brands AS b ON i.brand_id = b.uuid

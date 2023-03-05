@@ -14,7 +14,7 @@ class CategoriesServiceSpec(global: GlobalRead) extends IOSuite with LowPriority
   override def sharedResource: Resource[IO, Res] =
     global.getOrFailR[Res](None)(classBasedInstance)
 
-  test("Insert and read categories") { pool =>
+  test("Categories service works") { pool =>
     val service = CategoriesService.make[IO](pool)
 
     val names =

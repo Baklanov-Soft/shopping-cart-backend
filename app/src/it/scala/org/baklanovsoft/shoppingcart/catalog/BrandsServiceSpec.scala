@@ -14,7 +14,7 @@ class BrandsServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpl
   override def sharedResource: Resource[IO, Res] =
     global.getOrFailR[Res](None)(classBasedInstance)
 
-  test("Insert and read brands") { pool =>
+  test("Brands service works") { pool =>
     val service = BrandsService.make[IO](pool)
 
     val names =
