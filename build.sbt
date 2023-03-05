@@ -64,6 +64,7 @@ lazy val app =
       libraryDependencies ++= Seq(
         Dependencies.TestDependencies.scalaTest
       ) ++ Seq(
+        Dependencies.TestDependencies.testcontainers,
         Dependencies.TestDependencies.weaver
       ).flatten
     )

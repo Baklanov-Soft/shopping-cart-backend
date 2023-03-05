@@ -124,7 +124,10 @@ object Dependencies {
 
   object TestDependencies {
 
-    val testcontainers = "org.testcontainers" % "testcontainers" % Versions.testcontainers % "it"
+    val testcontainers = Seq(
+      "org.testcontainers" % "testcontainers",
+      "org.testcontainers" % "postgresql"
+    ).map(_ % Versions.testcontainers % "it")
 
     val scalaTest = "org.scalatest" %% "scalatest"      % Versions.scalaTest % "it,test"
     val scalaMock = "org.scalamock" %% "scalamock-core" % Versions.scalaMock % "it,test"
