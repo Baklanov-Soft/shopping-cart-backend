@@ -20,11 +20,11 @@ final case class CreateItem(
     name: ItemName,
     description: ItemDescription,
     price: Money,
-    brand: Brand,
-    category: Category
+    brandId: BrandId,
+    categoryId: CategoryId
 )
 
 final case class UpdateItem(
-    uuid: ItemId,
+    id: ItemId,
     price: Money
 )

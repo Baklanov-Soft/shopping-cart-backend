@@ -37,6 +37,7 @@ lazy val app =
         Dependencies.cats,
         Dependencies.catsEffect,
         Dependencies.catsRetry,
+        Dependencies.fs2,
         Dependencies.flyway,
         Dependencies.flyway4s,
         Dependencies.newtype,
