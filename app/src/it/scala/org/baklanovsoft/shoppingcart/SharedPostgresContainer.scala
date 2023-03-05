@@ -37,7 +37,8 @@ object SharedPostgresContainer extends GlobalResource with LowPriorityImplicits 
 
       migration = Database.make[IO](dbConfig)
 
-      _ <- migration
-      _ <- global.putR(container)(classBasedInstance)
+      pool <- migration
+
+      _ <- global.putR(pool)(classBasedInstance)
     } yield ()
 }
