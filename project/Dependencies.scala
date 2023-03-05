@@ -13,9 +13,8 @@ object Dependencies {
 
     val derevo = "0.13.0"
 
-    val doobie = "0.13.4"
-
-    val flyway = "9.15.1"
+    val flyway   = "9.15.1"
+    val flyway4s = "0.0.17"
 
     val fs2 = "3.6.1"
 
@@ -27,12 +26,14 @@ object Dependencies {
     val newtype = "0.4.4"
 
     val pureconfig = "0.17.2"
+    val postgresql = "42.5.4"
 
     val redis4cats = "1.4.0"
     val refined    = "0.10.1"
 
     val scalaTest = "3.2.15"
     val scalaMock = "3.6.0"
+    val skunk     = "0.5.1"
     val squants   = "1.8.3"
 
     val tapir          = "1.2.9"
@@ -69,14 +70,8 @@ object Dependencies {
     "tf.tofu" %% "derevo-pureconfig"
   ).map(_ % Versions.derevo)
 
-  val doobie = Seq(
-    "org.tpolecat" %% "doobie-core",
-    "org.tpolecat" %% "doobie-postgres",
-    "org.tpolecat" %% "doobie-hikari",
-    "org.tpolecat" %% "doobie-refined"
-  ).map(_ % Versions.doobie)
-
-  val flyway = "org.flywaydb" % "flyway-core" % Versions.flyway
+  val flyway   = "org.flywaydb"        % "flyway-core" % Versions.flyway
+  val flyway4s = "com.github.geirolz" %% "fly4s-core"  % Versions.flyway4s
 
   val fs2 = "co.fs2" %% "fs2-core" % Versions.fs2
 
@@ -98,6 +93,8 @@ object Dependencies {
     "com.github.pureconfig" %% "pureconfig-cats-effect"
   ).map(_ % Versions.pureconfig)
 
+  val postgresql = "org.postgresql" % "postgresql" % Versions.postgresql
+
   val redis4cats = Seq(
     "dev.profunktor" %% "redis4cats-core",
     "dev.profunktor" %% "redis4cats-effects"
@@ -107,6 +104,10 @@ object Dependencies {
     "eu.timepit" %% "refined",
     "eu.timepit" %% "refined-pureconfig"
   ).map(_ % Versions.refined)
+
+  val skunk = Seq(
+    "org.tpolecat" %% "skunk-core"
+  ).map(_ % Versions.skunk)
 
   val squants = "org.typelevel" %% "squants" % Versions.squants
 

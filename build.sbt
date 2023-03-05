@@ -37,7 +37,10 @@ lazy val app =
         Dependencies.cats,
         Dependencies.catsEffect,
         Dependencies.catsRetry,
+        Dependencies.flyway,
+        Dependencies.flyway4s,
         Dependencies.newtype,
+        Dependencies.postgresql,
         Dependencies.squants,
         Dependencies.logback,
         Dependencies.log4cats
@@ -46,8 +49,8 @@ lazy val app =
         Dependencies.circe,
         Dependencies.derevo,
         Dependencies.http4s,
-        Dependencies.pureconfig,
         Dependencies.refined,
+        Dependencies.skunk,
         Dependencies.tapir
       ).flatten
     )
