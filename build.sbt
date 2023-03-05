@@ -71,3 +71,7 @@ lazy val app =
     .settings(
       testFrameworks += new TestFramework("weaver.framework.CatsEffect")
     )
+    .settings(
+      coverageFailOnMinimum    := true,
+      coverageMinimumStmtTotal := 15
+    )
