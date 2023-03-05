@@ -23,13 +23,12 @@ sbt:shopping-cart-backend> IntegrationTest/test
 
 ### Coverage
 
-```
-for unit tests:
+```bash
 $ sbt clean coverage test
-$ sbt coverageReport
 
-for integration tests:
-$ sbt clean coverage it:test
+# no clean here because it will delete unit test coverage results
+$ sbt coverage it:test 
+
 $ sbt coverageReport
 ```
 
