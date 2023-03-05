@@ -75,7 +75,7 @@ class ItemsServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
       )
       .and(         // price is updated
         expect(
-          updated.flatten.length == ids1.length + 1 &&
+          updated.flatten.length == ids1.length &&
             updated.flatten.map(_.price).forall(_ == updatedMoney)
         )
       )
