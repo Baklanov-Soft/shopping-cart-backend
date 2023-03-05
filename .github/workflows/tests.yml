@@ -6,8 +6,9 @@ on:
 
 jobs:
 
-  setup-jdk:
+  build-project:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@master
 
@@ -16,20 +17,11 @@ jobs:
         with:
           java-version: 17
 
-  code-format:
-    needs: setup-jdk
-    steps:
       - name: Run scalafmt
         run: sbt scalafmtCheckAll
 
-  unit-tests:
-    needs: code-format
-    steps:
       - name: Run tests
         run: sbt test
 
-  integration-tests:
-    needs: unit-tests
-    steps:
       - name: Run integration tests
         run: sbt IntegrationTest/test
