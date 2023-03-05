@@ -1,9 +1,17 @@
 version: "3"
 
 services:
-  shopping-cart-backend:
-    #build: .
-    image: denisnovac/shopping-cart-backend:test-amd64
-    container_name: shopping-card-backend
+  #  shopping-cart-backend:
+  #    #build: .
+  #    image: denisnovac/shopping-cart-backend:test-amd64
+  #    container_name: shopping-card-backend
+  #    ports:
+  #      - "8080:8080"
+  db:
+    image: postgres:alpine3.17
+    container_name: db
     ports:
-      - "8080:8080"
+      - 5432:5432
+    environment:
+      POSTGRES_DB: shopping-cart
+      POSTGRES_PASSWORD: postgres

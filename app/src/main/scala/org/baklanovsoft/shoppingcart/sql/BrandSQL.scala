@@ -1,4 +1,5 @@
 package org.baklanovsoft.shoppingcart.sql
+
 import org.baklanovsoft.shoppingcart.catalog.model.{Brand, BrandId, BrandName}
 import skunk._
 import skunk.codec.all._
@@ -21,7 +22,7 @@ object BrandSQL {
          SELECT * FROM brands
        """.query(codec)
 
-  val insertBrand: Command[Brand] =
+  val insert: Command[Brand] =
     sql"""
          INSERT INTO brands
          VALUES ($codec)
