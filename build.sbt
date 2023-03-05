@@ -37,7 +37,11 @@ lazy val app =
         Dependencies.cats,
         Dependencies.catsEffect,
         Dependencies.catsRetry,
+        Dependencies.fs2,
+        Dependencies.flyway,
+        Dependencies.flyway4s,
         Dependencies.newtype,
+        Dependencies.postgresql,
         Dependencies.squants,
         Dependencies.logback,
         Dependencies.log4cats
@@ -46,8 +50,8 @@ lazy val app =
         Dependencies.circe,
         Dependencies.derevo,
         Dependencies.http4s,
-        Dependencies.pureconfig,
         Dependencies.refined,
+        Dependencies.skunk,
         Dependencies.tapir
       ).flatten
     )
@@ -61,9 +65,14 @@ lazy val app =
       libraryDependencies ++= Seq(
         Dependencies.TestDependencies.scalaTest
       ) ++ Seq(
+        Dependencies.TestDependencies.testcontainers,
         Dependencies.TestDependencies.weaver
       ).flatten
     )
     .settings(
       testFrameworks += new TestFramework("weaver.framework.CatsEffect")
+    )
+    .settings(
+      coverageFailOnMinimum    := true,
+      coverageMinimumStmtTotal := 15
     )
