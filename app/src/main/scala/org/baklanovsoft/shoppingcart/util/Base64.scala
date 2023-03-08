@@ -1,5 +1,6 @@
 package org.baklanovsoft.shoppingcart.util
 
+import cats.implicits._
 import cats.ApplicativeThrow
 import cats.effect.kernel.Sync
 
@@ -9,6 +10,8 @@ import java.util.{Base64 => JBase64}
 trait Base64[F[_]] {
   def encode(str: String): F[String]
   def encode(bytes: Array[Byte]): F[String]
+
+  def decodeToBytes(strBase64: String): F[Array[Byte]]
   def decode(strBase64: String): F[String]
 }
 
@@ -26,13 +29,13 @@ object Base64 {
       override def encode(str: String): F[String] =
         encode(str.getBytes(StandardCharsets.UTF_8))
 
-      override def decode(strBase64: String): F[String] =
+      override def decodeToBytes(strBase64: String): F[Array[Byte]] =
         ApplicativeThrow[F].catchNonFatal {
-          new String(
-            JBase64.getDecoder.decode(strBase64),
-            StandardCharsets.UTF_8
-          )
+          JBase64.getDecoder.decode(strBase64)
         }
+
+      override def decode(strBase64: String): F[String] =
+        decodeToBytes(strBase64).map(b => new String(b, StandardCharsets.UTF_8))
     }
 
 }

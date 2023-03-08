@@ -5,7 +5,7 @@ import cats.implicits._
 import org.baklanovsoft.shoppingcart.catalog.model.ItemId
 import org.baklanovsoft.shoppingcart.payment.ShoppingCartService
 import org.baklanovsoft.shoppingcart.payment.model.{Cart, CartTotal}
-import org.baklanovsoft.shoppingcart.user.model.User
+import org.baklanovsoft.shoppingcart.user.model.AuthUser
 import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.model.StatusCode
 import sttp.tapir._
@@ -18,18 +18,18 @@ final case class ShoppingCartController[F[_]: Monad](
 
   private val get =
     ShoppingCartController.getForCurrentUser
-      .serverSecurityLogic[User, F](auth.auth)
-      .serverLogicSuccess { (user: User) => (_: Unit) =>
-        shoppingCartService.get(user.id)
+      .serverSecurityLogic[AuthUser, F](auth.auth)
+      .serverLogicSuccess { (user: AuthUser) => (_: Unit) =>
+        shoppingCartService.get(user.userId)
       }
 
   private val addItemToCart =
     ShoppingCartController.addItemToCart
-      .serverSecurityLogic[User, F](auth.auth)
-      .serverLogicSuccess { (user: User) => body =>
+      .serverSecurityLogic[AuthUser, F](auth.auth)
+      .serverLogicSuccess { (user: AuthUser) => body =>
         body.items
           .map { case (id, quantity) =>
-            shoppingCartService.add(user.id, id, quantity)
+            shoppingCartService.add(user.userId, id, quantity)
           }
           .toList
           .sequence *> ().pure[F]
@@ -37,18 +37,18 @@ final case class ShoppingCartController[F[_]: Monad](
 
   private val modifyItemsInCart =
     ShoppingCartController.modifyItemsInCart
-      .serverSecurityLogic[User, F](auth.auth)
-      .serverLogicSuccess { (user: User) => body =>
+      .serverSecurityLogic[AuthUser, F](auth.auth)
+      .serverLogicSuccess { (user: AuthUser) => body =>
         shoppingCartService
-          .update(user.id, body)
+          .update(user.userId, body)
       }
 
   private val deleteFromCart =
     ShoppingCartController.deleteFromCart
-      .serverSecurityLogic[User, F](auth.auth)
-      .serverLogicSuccess { (user: User) => body =>
+      .serverSecurityLogic[AuthUser, F](auth.auth)
+      .serverLogicSuccess { (user: AuthUser) => body =>
         shoppingCartService
-          .removeItem(user.id, body)
+          .removeItem(user.userId, body)
       }
 
   override val routes = List(

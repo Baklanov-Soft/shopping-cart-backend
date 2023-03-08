@@ -23,7 +23,7 @@ object UsersSQL {
     varchar.imap[PasswordHashed](PasswordHashed.apply)(_.value)
 
   private val salt =
-    varchar.imap[Salt](Salt.apply)(_.value)
+    varchar.imap[Salt](Salt.apply)(_.base64String)
 
   private val userDb: Codec[UserDb] =
     (userId ~ username ~ passwordHashed)

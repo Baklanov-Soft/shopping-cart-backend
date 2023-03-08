@@ -19,10 +19,11 @@ object Hash {
   implicit def forSync[F[_]: Sync: Base64]: Hash[F] =
     (password: Password, salt: Salt, iterations: Int) =>
       for {
+        saltValue <- Base64[F].decodeToBytes(salt.base64String)
         hashBytes <- Sync[F].delay {
                        PBKDF2.apply(
                          password = password.value.getBytes(StandardCharsets.UTF_8),
-                         salt = salt.value.getBytes(StandardCharsets.UTF_8),
+                         salt = saltValue,
                          iterations = iterations,
                          dkLength = 32,
                          cryptoAlgo = "HmacSHA512"

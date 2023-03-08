@@ -28,10 +28,10 @@ final case class UserController[F[_]: MonadThrow](auth: Auth[F]) extends Control
   private val logout =
     UserController.logout
       .serverSecurityLogic(auth.authWithToken)
-      .serverLogic { case (token, user) =>
+      .serverLogic { case (token, _) =>
         _ =>
           auth
-            .logout(token, user.name)
+            .logout(token)
             .map(_.map(_ => StatusCode.Ok))
       }
 

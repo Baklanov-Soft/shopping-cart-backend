@@ -6,6 +6,7 @@ import com.comcast.ip4s._
 import org.baklanovsoft.shoppingcart.config.DatabaseConfig
 import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.jdbc.Database
+import org.baklanovsoft.shoppingcart.user.{AuthService, UsersService}
 import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
@@ -15,15 +16,9 @@ import scala.concurrent.duration._
 
 object Main extends IOApp {
 
-  import DummyServices._
-
-  private val auth           = Auth[IO](authService)
-  private val brands         = BrandsController[IO](brandsService)
-  private val items          = ItemsController[IO](itemsService)
-  private val health         = HealthController[IO](healthService)
-  private val userController = UserController[IO](auth)
-  private val shoppingCart   = ShoppingCartController[IO](auth, shoppingCartService)
-  private val orders         = OrdersController[IO](auth, ordersService)
+  private val brands = BrandsController[IO](DummyServices.brandsService)
+  private val items  = ItemsController[IO](DummyServices.itemsService)
+  private val health = HealthController[IO](DummyServices.healthService)
 
   private val dbConfig = DatabaseConfig(
     database = "shopping-cart"
@@ -44,10 +39,18 @@ object Main extends IOApp {
   private val resource = for {
     implicit0(s: Supervisor[IO]) <- Supervisor[IO]
 
-    checkout = CheckoutController[IO](auth, checkoutService)
-    routes   = Routes[IO](health, userController, brands, items, shoppingCart, orders, checkout)
+    pool <- Database.make[IO](dbConfig)
 
-    _ <- Database.make[IO](dbConfig)
+    usersService = UsersService.make[IO](pool)
+    authService <- Resource.eval(AuthService.make[IO](usersService))
+
+    auth           = Auth[IO](authService)
+    userController = UserController[IO](auth)
+    shoppingCart   = ShoppingCartController[IO](auth, DummyServices.shoppingCartService)
+    orders         = OrdersController[IO](auth, DummyServices.ordersService)
+
+    checkout = CheckoutController[IO](auth, DummyServices.checkoutService)
+    routes   = Routes[IO](health, userController, brands, items, shoppingCart, orders, checkout)
 
     _ <- serverR(routes)
   } yield ()
