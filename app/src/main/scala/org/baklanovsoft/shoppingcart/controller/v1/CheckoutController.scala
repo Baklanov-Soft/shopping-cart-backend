@@ -1,7 +1,7 @@
 package org.baklanovsoft.shoppingcart.controller.v1
 
-import cats.implicits._
 import cats.effect.kernel.Sync
+import cats.implicits._
 import org.baklanovsoft.shoppingcart.payment.CheckoutService
 import org.baklanovsoft.shoppingcart.payment.CheckoutService.CheckoutError
 import org.baklanovsoft.shoppingcart.payment.model.{Card, OrderId}
@@ -27,7 +27,7 @@ final case class CheckoutController[F[_]: Sync](auth: Auth[F], checkoutService: 
       .serverSecurityLogic(auth.authWithStatus)
       .serverLogic { user => card =>
         checkoutService
-          .process(user.id, card)
+          .process(user.userId, card)
           .attempt
           .map(_.left.map(mapError))
       }

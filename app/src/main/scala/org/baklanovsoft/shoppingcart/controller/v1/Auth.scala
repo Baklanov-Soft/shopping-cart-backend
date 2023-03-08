@@ -10,26 +10,26 @@ final case class Auth[F[_]: Functor](
     authService: AuthService[F]
 ) {
 
-  def authWithStatusAndToken(jwtToken: JwtToken): F[Either[(StatusCode, String), (JwtToken, User)]] =
+  def authWithStatusAndToken(jwtToken: JwtToken): F[Either[(StatusCode, String), (JwtToken, AuthUser)]] =
     authService
       .findUser(jwtToken)
-      .map(_.fold((StatusCode.Forbidden -> "Forbidden").asLeft[(JwtToken, User)])(user => (jwtToken, user).asRight))
+      .map(_.fold((StatusCode.Forbidden -> "Forbidden").asLeft[(JwtToken, AuthUser)])(user => (jwtToken, user).asRight))
 
-  def authWithStatus(jwtToken: JwtToken): F[Either[(StatusCode, String), User]] =
+  def authWithStatus(jwtToken: JwtToken): F[Either[(StatusCode, String), AuthUser]] =
     authWithStatusAndToken(jwtToken)
       .map(_.map(_._2))
 
-  def auth(jwtToken: JwtToken): F[Either[Unit, User]] =
+  def auth(jwtToken: JwtToken): F[Either[Unit, AuthUser]] =
     authWithStatus(jwtToken)
       .map(_.left.map(_ => ()))
 
-  def authWithToken(jwtToken: JwtToken): F[Either[Unit, (JwtToken, User)]] =
+  def authWithToken(jwtToken: JwtToken): F[Either[Unit, (JwtToken, AuthUser)]] =
     authWithStatusAndToken(jwtToken)
       .map(_.left.map(_ => ()))
 
   def login(loginUser: LoginUser): F[Either[Unit, JwtToken]] =
     authService
-      .login(loginUser.username, loginUser.password)
+      .login(loginUser)
       .map(_.asRight[Unit])
 
   def check(username: Username): F[StatusCode] =
@@ -40,12 +40,12 @@ final case class Auth[F[_]: Functor](
         case false => StatusCode.NotFound
       }
 
-  def logout(jwtToken: JwtToken, username: Username): F[Either[Unit, Unit]] =
+  def logout(jwtToken: JwtToken): F[Either[Unit, Unit]] =
     authService
-      .logout(jwtToken, username)
+      .logout(jwtToken)
       .map(_.asRight[Unit])
 
   def register(createUser: CreateUser): F[JwtToken] =
     authService
-      .newUser(createUser.username, createUser.password)
+      .newUser(createUser)
 }

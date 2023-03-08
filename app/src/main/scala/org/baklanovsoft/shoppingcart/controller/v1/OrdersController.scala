@@ -12,7 +12,7 @@ final case class OrdersController[F[_]](auth: Auth[F], ordersService: OrdersServ
     OrdersController.getAll
       .serverSecurityLogic(auth.auth)
       .serverLogicSuccess { user => _ =>
-        ordersService.findBy(user.id)
+        ordersService.findBy(user.userId)
       }
 
   private val find =
@@ -20,7 +20,7 @@ final case class OrdersController[F[_]](auth: Auth[F], ordersService: OrdersServ
       .serverSecurityLogic(auth.auth)
       .serverLogicSuccess { user => orderId =>
         ordersService
-          .get(user.id, orderId)
+          .get(user.userId, orderId)
 
       }
 

@@ -4,18 +4,17 @@ import cats.data.NonEmptyList
 import cats.effect._
 import cats.effect.std.Supervisor
 import cats.implicits._
+import org.baklanovsoft.shoppingcart.catalog._
+import org.baklanovsoft.shoppingcart.catalog.model._
+import org.baklanovsoft.shoppingcart.health._
+import org.baklanovsoft.shoppingcart.payment._
+import org.baklanovsoft.shoppingcart.payment.model._
+import org.baklanovsoft.shoppingcart.user.model._
 import org.baklanovsoft.shoppingcart.util.Background
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
-import org.baklanovsoft.shoppingcart.health._
-import org.baklanovsoft.shoppingcart.catalog._
-import org.baklanovsoft.shoppingcart.payment._
-import org.baklanovsoft.shoppingcart.user._
-import org.baklanovsoft.shoppingcart.catalog.model._
-import org.baklanovsoft.shoppingcart.payment.model._
-import org.baklanovsoft.shoppingcart.user.model._
-
 import squants.market.{Money, USD}
+
 import java.util.UUID
 
 object DummyServices {
@@ -63,47 +62,6 @@ object DummyServices {
     override def status: IO[AppHealth] = IO(
       AppHealth(RedisStatus(Status.Unreachable), PostgresStatus(Status.Unreachable))
     )
-  }
-
-  val authService = new AuthService[IO] {
-
-    private val user = User(
-      UserId(UUID.randomUUID()),
-      Username("admin")
-    )
-
-    private val pwd          = Password("admin")
-    private val correctToken = JwtToken("123")
-
-    override def findUser(
-        token: JwtToken
-    ): IO[Option[User]] = IO.delay {
-      if (token == correctToken) user.some
-      else Option.empty[User]
-    }
-
-    override def newUser(
-        username: Username,
-        password: Password
-    ): IO[JwtToken] = IO(JwtToken("234723743274"))
-
-    override def login(
-        username: Username,
-        password: Password
-    ): IO[JwtToken] =
-      if (username == user.name && password == pwd) correctToken.pure[IO]
-      else IO.raiseError[JwtToken](new Error("No user found"))
-
-    override def logout(
-        token: JwtToken,
-        username: Username
-    ): IO[Unit] = IO.unit
-
-    override def check(
-        username: Username
-    ): IO[Boolean] =
-      if (username == user.name) IO(true)
-      else IO(false)
   }
 
   val shoppingCartService = new ShoppingCartService[IO] {
