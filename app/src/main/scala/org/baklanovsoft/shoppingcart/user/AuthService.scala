@@ -3,7 +3,8 @@ package org.baklanovsoft.shoppingcart.user
 import cats.effect.{Ref, Sync}
 import cats.implicits._
 import org.baklanovsoft.shoppingcart.user.model._
-import org.baklanovsoft.shoppingcart.util.{GenUUID, Hash}
+import org.baklanovsoft.shoppingcart.util.{Base64, GenUUID, Hash}
+import org.typelevel.log4cats.{Logger, LoggerFactory}
 import sttp.model.StatusCode
 
 import scala.util.control.NoStackTrace
@@ -26,8 +27,10 @@ object AuthService {
     case object IncorrectPassword extends AuthErrors { override val statusCode: StatusCode = StatusCode.Forbidden }
   }
 
-  def make[F[_]: Sync: GenUUID: Hash](usersService: UsersService[F]) =
+  def make[F[_]: Sync: LoggerFactory: Base64: Hash](usersService: UsersService[F]) =
     Ref.of[F, Map[JwtToken, AuthUser]](Map.empty).map { sessions =>
+      implicit val logger: Logger[F] = LoggerFactory[F].getLogger
+
       new AuthService[F] {
 
         override def findUser(token: JwtToken): F[Option[AuthUser]] =
@@ -48,12 +51,18 @@ object AuthService {
             user        <- Sync[F].fromOption(maybeUser, AuthErrors.UserNotFound)
             hashToCheck <- Hash[F].calculate(loginUser.password, user.salt, user.iterations)
             _           <- Sync[F].whenA(hashToCheck != user.passwordHashed)(Sync[F].raiseError(AuthErrors.IncorrectPassword))
-            token       <- GenUUID[F].make.map(u => JwtToken(u.toString))
-            _           <- sessions.update(_.updated(token, user).filterNot(_._2.userId == user.userId))
+
+            // TODO generate normal jwt tokens
+            t     <- GenUUID[F].make.map(_.toString)
+            token <- Base64[F].encode(t).map(JwtToken.apply)
+
+            _ <- sessions.update(_.updated(token, user))
+            _ <- sessions.get.flatMap(s => Logger[F].info(s"New login, sessions list: $s"))
           } yield token
 
         override def logout(token: JwtToken): F[Unit] =
-          sessions.update(_.view.filterKeys(_ != token).toMap)
+          sessions.update(_.view.filterKeys(_ != token).toMap) >>
+            sessions.get.flatMap(s => Logger[F].info(s"User logout, sessions list: $s"))
       }
     }
 }
