@@ -1,4 +1,4 @@
-package org.baklanovsoft.shoppingcart.sql
+package org.baklanovsoft.shoppingcart.catalog.sql
 
 import org.baklanovsoft.shoppingcart.catalog.model._
 import skunk._

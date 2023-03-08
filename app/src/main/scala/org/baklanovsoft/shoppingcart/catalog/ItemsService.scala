@@ -20,7 +20,7 @@ object ItemsService {
   def make[F[_]: Concurrent: GenUUID](
       sessionR: Resource[F, Session[F]]
   ): ItemsService[F] = new ItemsService[F] {
-    import org.baklanovsoft.shoppingcart.sql.ItemSQL._
+    import org.baklanovsoft.shoppingcart.catalog.sql.ItemSQL._
 
     override def findAll: F[List[Item]] =
       sessionR.use(s => s.execute(selectAll))

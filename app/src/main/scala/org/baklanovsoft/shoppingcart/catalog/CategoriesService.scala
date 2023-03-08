@@ -13,7 +13,7 @@ trait CategoriesService[F[_]] {
 }
 
 object CategoriesService {
-  import org.baklanovsoft.shoppingcart.sql.CategoriesSQL._
+  import org.baklanovsoft.shoppingcart.catalog.sql.CategoriesSQL._
 
   def make[F[_]: GenUUID: MonadCancelThrow](
       sessionR: Resource[F, Session[F]]
