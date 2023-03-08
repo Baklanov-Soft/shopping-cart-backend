@@ -37,8 +37,9 @@ CREATE TABLE salt (
 );
 
 CREATE TABLE roles (
-    uuid UUID PRIMARY KEY,
     user_uuid UUID NOT NULL,
-    role VARCHAR NOT NULL
+    role VARCHAR NOT NULL,
+    UNIQUE (user_uuid, role),
+    CONSTRAINT user_uuid_fk FOREIGN KEY (user_uuid) REFERENCES users (uuid)
 )
 

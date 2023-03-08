@@ -1,6 +1,6 @@
 package org.baklanovsoft.shoppingcart.user.sql
 
-import org.baklanovsoft.shoppingcart.user.model.{PasswordHashed, Salt, UserId, Username}
+import org.baklanovsoft.shoppingcart.user.model.{PasswordHashed, Role, Salt, UserId, Username}
 import skunk._
 import skunk.codec.all._
 import skunk.implicits._
@@ -9,6 +9,9 @@ object UsersSQL {
 
   final case class SaltDb(userId: UserId, salt: Salt, iterations: Int)
   final case class UserDb(userId: UserId, username: Username, passwordHashed: PasswordHashed)
+
+  private val role =
+    varchar.imap[Role](Role.withName)(_.entryName)
 
   private val userId =
     uuid.imap[UserId](UserId.apply)(_.value)
@@ -64,7 +67,24 @@ object UsersSQL {
          DO UPDATE SET salt = $salt, iterations = $int4
        """.command.contramap { case saltDb =>
       saltDb ~ saltDb.salt ~ saltDb.iterations
-
     }
+
+  val selectRoles: Query[UserId, Role] =
+    sql"""
+         SELECT role FROM roles
+         WHERE user_uuid = $userId
+       """.query(role)
+
+  val addRole: Command[UserId ~ Role] =
+    sql"""
+         INSERT INTO roles
+         VALUES ($userId, $role)
+       """.command
+
+  val removeRole: Command[UserId ~ Role] =
+    sql"""
+        DELETE FROM roles
+        WHERE user_uuid = $userId AND role = $role
+       """.command
 
 }

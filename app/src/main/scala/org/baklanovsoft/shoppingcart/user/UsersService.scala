@@ -1,23 +1,22 @@
 package org.baklanovsoft.shoppingcart.user
 
-import cats.implicits._
 import cats.effect.Async
 import cats.effect.kernel.Resource
+import cats.implicits._
 import org.baklanovsoft.shoppingcart.user.model._
-import org.baklanovsoft.shoppingcart.user.sql.UsersSQL.{SaltDb, UserDb}
 import org.baklanovsoft.shoppingcart.util.{GenSalt, GenUUID, Hash}
 import skunk.Session
 
-import scala.annotation.nowarn
 import scala.util.control.NoStackTrace
 
 trait UsersService[F[_]] {
-  def find(username: Username): F[Option[(UserDb, SaltDb)]]
+  def find(username: Username): F[Option[AuthUser]]
   def create(createUser: CreateUser): F[UserId]
   def updatePassword(changePassword: ChangePassword): F[Unit]
+  def addRole(userId: UserId, role: Role): F[Unit]
+  def removeRole(userId: UserId, role: Role): F[Unit]
 }
 
-@nowarn
 object UsersService {
 
   case object UserNotFound extends NoStackTrace
@@ -28,13 +27,25 @@ object UsersService {
 
     override def find(
         username: Username
-    ): F[Option[(UserDb, SaltDb)]] =
+    ): F[Option[AuthUser]] =
       sessionR.use { s =>
         for {
-          user      <- s.prepare(selectUser)
-          maybeUser <- user.option(username)
-          maybeSalt <- maybeUser.flatTraverse(u => s.prepare(selectSalt).flatMap(_.option(u.userId)))
-        } yield (maybeUser, maybeSalt).tupled
+          user       <- s.prepare(selectUser)
+          maybeUser  <- user.option(username)
+          maybeSalt  <- maybeUser.flatTraverse(u => s.prepare(selectSalt).flatMap(_.option(u.userId)))
+          maybeRoles <- maybeUser.traverse(u => s.prepare(selectRoles).flatMap(_.stream(u.userId, 1024).compile.toList))
+
+          result = (maybeUser, maybeSalt, maybeRoles).tupled.map { case (u, s, r) =>
+                     AuthUser(
+                       u.userId,
+                       u.username,
+                       u.passwordHashed,
+                       s.salt,
+                       s.iterations,
+                       r.toSet
+                     )
+                   }
+        } yield result
 
       }
 
@@ -56,6 +67,9 @@ object UsersService {
           upsertSalt <- s.prepare(upsertSalt)
           _          <- upsertSalt.execute(SaltDb(uuid, salt, iterations))
 
+          addRole <- s.prepare(UsersSQL.addRole)
+          _       <- addRole.execute((uuid, Role.User))
+
         } yield uuid
 
       }
@@ -74,13 +88,19 @@ object UsersService {
         user       <- Async[F].fromOption(maybeUser, UserNotFound)
 
         updatePassword <- s.prepare(UsersSQL.updatePassword)
-        _              <- updatePassword.execute(passwordHash, changePassword.username)
+        _              <- updatePassword.execute((passwordHash, changePassword.username))
 
         updateSalt <- s.prepare(upsertSalt)
         _          <- updateSalt.execute(SaltDb(user.userId, salt, iterations))
 
       } yield ()
-
     }
+
+    def addRole(userId: UserId, role: Role): F[Unit] =
+      sessionR.use(s => s.prepare(UsersSQL.addRole).flatMap(_.execute((userId, role)))).void
+
+    def removeRole(userId: UserId, role: Role): F[Unit] =
+      sessionR.use(s => s.prepare(UsersSQL.removeRole).flatMap(_.execute((userId, role)))).void
+
   }
 }
