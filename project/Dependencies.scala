@@ -13,6 +13,8 @@ object Dependencies {
 
     val derevo = "0.13.0"
 
+    val enumeratum = "1.7.2"
+
     val flyway   = "9.15.1"
     val flyway4s = "0.0.17"
 
@@ -25,6 +27,7 @@ object Dependencies {
 
     val newtype = "0.4.4"
 
+    val pbkdf2     = "0.7.0"
     val pureconfig = "0.17.2"
     val postgresql = "42.5.4"
 
@@ -70,6 +73,8 @@ object Dependencies {
     "tf.tofu" %% "derevo-pureconfig"
   ).map(_ % Versions.derevo)
 
+  val enumeratum = Seq("com.beachape" %% "enumeratum").map(_ % Versions.enumeratum)
+
   val flyway   = "org.flywaydb"        % "flyway-core" % Versions.flyway
   val flyway4s = "com.github.geirolz" %% "fly4s-core"  % Versions.flyway4s
 
@@ -85,6 +90,8 @@ object Dependencies {
   val logback  = "ch.qos.logback" % "logback-classic" % Versions.logback
 
   val newtype = "io.estatico" %% "newtype" % Versions.newtype
+
+  val pbkdf2 = "io.github.nremond" %% "pbkdf2-scala" % Versions.pbkdf2
 
   val pureconfig = Seq(
     "com.github.pureconfig" %% "pureconfig",

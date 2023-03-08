@@ -8,6 +8,7 @@ import java.util.{Base64 => JBase64}
 
 trait Base64[F[_]] {
   def encode(str: String): F[String]
+  def encode(bytes: Array[Byte]): F[String]
   def decode(strBase64: String): F[String]
 }
 
@@ -16,10 +17,14 @@ object Base64 {
 
   implicit def forSync[F[_]: Sync]: Base64[F] =
     new Base64[F] {
-      override def encode(str: String): F[String] =
+
+      def encode(bytes: Array[Byte]): F[String] =
         Sync[F].delay {
-          JBase64.getEncoder.encodeToString(str.getBytes(StandardCharsets.UTF_8))
+          JBase64.getEncoder.encodeToString(bytes)
         }
+
+      override def encode(str: String): F[String] =
+        encode(str.getBytes(StandardCharsets.UTF_8))
 
       override def decode(strBase64: String): F[String] =
         ApplicativeThrow[F].catchNonFatal {
