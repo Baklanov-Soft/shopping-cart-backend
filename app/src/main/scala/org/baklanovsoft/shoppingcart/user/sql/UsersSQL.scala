@@ -45,8 +45,8 @@ object UsersSQL {
 
   val updatePassword: Command[PasswordHashed ~ Username] =
     sql"""
-         INSERT INTO users
-         VALUES ( $passwordHashed )
+         UPDATE users
+         SET passwordHashed = $passwordHashed
          WHERE username = $username
        """.command
 
