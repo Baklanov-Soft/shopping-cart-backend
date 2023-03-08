@@ -9,11 +9,13 @@ trait GenSalt[F[_]] {
 }
 
 object GenSalt {
+  private val SALT_LENGTH_RECOMMENDED = 16
+
   def apply[F[_]: GenSalt]: GenSalt[F] = implicitly
 
   implicit def forSync[F[_]: Sync]: GenSalt[F] =
     new GenSalt[F] {
       override def make: F[Salt] =
-        Sync[F].delay(Salt(Random.nextString(12)))
+        Sync[F].delay(Salt(Random.nextString(SALT_LENGTH_RECOMMENDED)))
     }
 }

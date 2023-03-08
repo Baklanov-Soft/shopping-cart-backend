@@ -3,15 +3,17 @@ package org.baklanovsoft.shoppingcart.util
 import cats.effect.kernel.Sync
 import cats.implicits._
 import io.github.nremond.PBKDF2
-import org.baklanovsoft.shoppingcart.user.model.{HashedPassword, Password, Salt}
+import org.baklanovsoft.shoppingcart.user.model.{Password, PasswordHashed, Salt}
 
 import java.nio.charset.StandardCharsets
 
 trait Hash[F[_]] {
-  def calculate(password: Password, salt: Salt, iterations: Int): F[HashedPassword]
+  def calculate(password: Password, salt: Salt, iterations: Int): F[PasswordHashed]
 }
 
 object Hash {
+  val ITERATIONS_RECOMMENDED: Int = 210_000 // 2023 OWASP for HmacSHA512
+
   def apply[F[_]: Hash]: Hash[F] = implicitly
 
   implicit def forSync[F[_]: Sync: Base64]: Hash[F] =
@@ -27,5 +29,5 @@ object Hash {
                        )
                      }
         hashStr   <- Base64[F].encode(hashBytes)
-      } yield HashedPassword(hashStr)
+      } yield PasswordHashed(hashStr)
 }

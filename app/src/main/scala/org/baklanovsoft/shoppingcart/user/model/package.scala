@@ -12,5 +12,5 @@ package object model {
 
   @newtype case class Password(value: String)
   @newtype case class Salt(value: String)
-  @newtype case class HashedPassword(value: String)
+  @newtype case class PasswordHashed(value: String)
 }
