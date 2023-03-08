@@ -11,6 +11,4 @@ object ControllerDomain {
     def toDomain: BrandName =
       BrandName(value.toLowerCase.capitalize)
   }
-
-  @newtype case class Base64Username(value: NonEmptyString)
 }
