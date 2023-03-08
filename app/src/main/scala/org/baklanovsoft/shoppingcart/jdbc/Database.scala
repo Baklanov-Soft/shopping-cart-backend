@@ -8,16 +8,25 @@ import fly4s.core.data.{Fly4sConfig, Location}
 import natchez.Trace.Implicits.noop
 import org.baklanovsoft.shoppingcart.config.DatabaseConfig
 import org.typelevel.log4cats.{Logger, LoggerFactory}
+import retry.RetryPolicies._
+import retry.{RetryDetails, retryingOnAllErrors}
 import skunk.Session
 import skunk.codec.all.text
 import skunk.implicits._
+
+import scala.concurrent.duration._
 
 final case class Database[F[_]: Async: Console: Logger] private (dbConfig: DatabaseConfig) {
   import org.baklanovsoft.shoppingcart.jdbc.Database.Pool
 
   private val flywayUrl = s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.database}"
 
-  private val migration =
+  private val policy = limitRetries[F](5) |+| exponentialBackoff[F](5.seconds)
+
+  private def onError(e: Throwable, d: RetryDetails) =
+    Logger[F].warn(s"Migration failed with error ${e.getMessage} \nRetry details: $d")
+
+  private val migration: F[Unit] =
     Fly4s
       .make[F](
         url = flywayUrl,
@@ -29,7 +38,9 @@ final case class Database[F[_]: Async: Console: Logger] private (dbConfig: Datab
         )
       )
       .onFinalize(Logger[F].info("Fly4s connection resource is closed"))
-      .use(_.migrate) // to close the connection right after migration, not after app completes
+      // to close the connection right after migration, not after app completes
+      .use(r => retryingOnAllErrors.apply(policy, onError)(r.migrate))
+      .void
 
   private def checkPostgresConnection(
       sessionR: Resource[F, Session[F]]
