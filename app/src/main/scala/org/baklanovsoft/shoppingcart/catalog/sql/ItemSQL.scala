@@ -1,8 +1,8 @@
-package org.baklanovsoft.shoppingcart.sql
+package org.baklanovsoft.shoppingcart.catalog.sql
 
 import org.baklanovsoft.shoppingcart.catalog.model._
-import org.baklanovsoft.shoppingcart.sql.BrandSQL.{brandId, brandName}
-import org.baklanovsoft.shoppingcart.sql.CategoriesSQL.{categoryId, categoryName}
+import BrandSQL.{brandId, brandName}
+import CategoriesSQL.{categoryId, categoryName}
 import skunk._
 import skunk.codec.all._
 import skunk.implicits._

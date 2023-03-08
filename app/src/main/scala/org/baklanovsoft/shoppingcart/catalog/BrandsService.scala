@@ -13,7 +13,7 @@ trait BrandsService[F[_]] {
 }
 
 object BrandsService {
-  import org.baklanovsoft.shoppingcart.sql.BrandSQL._
+  import org.baklanovsoft.shoppingcart.catalog.sql.BrandSQL._
 
   def make[F[_]: GenUUID: MonadCancelThrow](
       sessionR: Resource[F, Session[F]]

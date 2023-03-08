@@ -19,6 +19,9 @@ sbt:shopping-cart-backend> test
 
 For integration tests:
 sbt:shopping-cart-backend> IntegrationTest/test
+
+To test only one integration test always include shared resource:
+sbt:shopping-cart-backend> IntegrationTest/testOnly *SharedPostgresContainer *UsersServiceSpec
 ```
 
 ### Coverage
