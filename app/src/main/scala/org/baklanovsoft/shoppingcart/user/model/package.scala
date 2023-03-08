@@ -11,6 +11,6 @@ package object model {
   @newtype case class JwtToken(value: String)
 
   @newtype case class Password(value: String)
-  @newtype case class Salt(value: String)
+  @newtype case class Salt(base64String: String)
   @newtype case class PasswordHashed(value: String)
 }

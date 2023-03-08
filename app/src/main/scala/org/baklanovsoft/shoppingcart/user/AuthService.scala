@@ -27,7 +27,7 @@ object AuthService {
     case object IncorrectPassword extends AuthErrors { override val statusCode: StatusCode = StatusCode.Forbidden }
   }
 
-  def make[F[_]: Sync: LoggerFactory: Base64: Hash](usersService: UsersService[F]) =
+  def make[F[_]: Sync: LoggerFactory: Base64: Hash](usersService: UsersService[F]): F[AuthService[F]] =
     Ref.of[F, Map[JwtToken, AuthUser]](Map.empty).map { sessions =>
       implicit val logger: Logger[F] = LoggerFactory[F].getLogger
 
