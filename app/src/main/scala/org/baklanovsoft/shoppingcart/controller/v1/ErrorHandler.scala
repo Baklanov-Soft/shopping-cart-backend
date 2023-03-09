@@ -13,7 +13,11 @@ object ErrorHandler {
   def withErrorHandler[F[_]: MonadThrow: Logger, A](action: F[A]): F[Either[EndpointError, A]] =
     action.attempt.flatMap(mapErrorE[F, A])
 
-  def mapError[F[_]: Applicative: Logger]: Throwable => F[EndpointError] = {
+  def mapErrorE[F[_]: Applicative: Logger, A]: Either[Throwable, A] => F[Either[EndpointError, A]] = { e =>
+    e.left.map(mapErrorT[F]).leftSequence
+  }
+
+  def mapErrorT[F[_]: Applicative: Logger]: Throwable => F[EndpointError] = {
     case d: DomainError =>
       Logger[F].warn(s"Domain error: $d") *>
         (StatusCode.apply(d.status), s"${d.code}${d.description.fold("")(s => s": $s")}".trim).pure[F]
@@ -23,7 +27,4 @@ object ErrorHandler {
         (StatusCode.InternalServerError, "").pure[F]
   }
 
-  def mapErrorE[F[_]: Applicative: Logger, A]: Either[Throwable, A] => F[Either[EndpointError, A]] = { e =>
-    e.left.map(mapError[F]).leftSequence
-  }
 }
