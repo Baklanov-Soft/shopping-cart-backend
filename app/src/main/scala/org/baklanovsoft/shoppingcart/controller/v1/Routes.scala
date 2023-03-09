@@ -13,6 +13,7 @@ import sttp.tapir.swagger.{SwaggerUI, SwaggerUIOptions}
 final case class Routes[F[_]: Async](
     healthController: HealthController[F],
     userController: UserController[F],
+    categoriesController: CategoriesController[F],
     brandsController: BrandsController[F],
     itemsController: ItemsController[F],
     shoppingCartController: ShoppingCartController[F],
@@ -26,6 +27,7 @@ final case class Routes[F[_]: Async](
     List(
       healthController,
       userController,
+      categoriesController,
       brandsController,
       itemsController,
       shoppingCartController,
