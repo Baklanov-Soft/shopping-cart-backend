@@ -27,10 +27,9 @@ final case class Auth[F[_]: Functor](
     authWithStatusAndToken(jwtToken)
       .map(_.left.map(_ => ()))
 
-  def login(loginUser: LoginUser): F[Either[Unit, JwtToken]] =
+  def login(loginUser: LoginUser): F[JwtToken] =
     authService
       .login(loginUser)
-      .map(_.asRight[Unit])
 
   def check(username: Username): F[StatusCode] =
     authService

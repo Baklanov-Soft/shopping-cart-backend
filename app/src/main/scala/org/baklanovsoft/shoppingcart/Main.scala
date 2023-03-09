@@ -45,11 +45,11 @@ object Main extends IOApp {
     authService <- Resource.eval(AuthService.make[IO](usersService))
 
     auth           = Auth[IO](authService)
-    userController = UserController[IO](auth)
+    userController = UserController.make[IO](auth)
     shoppingCart   = ShoppingCartController[IO](auth, DummyServices.shoppingCartService)
     orders         = OrdersController[IO](auth, DummyServices.ordersService)
 
-    checkout = CheckoutController[IO](auth, DummyServices.checkoutService)
+    checkout = CheckoutController.make[IO](auth, DummyServices.checkoutService)
     routes   = Routes[IO](health, userController, brands, items, shoppingCart, orders, checkout)
 
     _ <- serverR(routes)

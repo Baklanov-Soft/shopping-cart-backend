@@ -3,6 +3,7 @@ package org.baklanovsoft.shoppingcart.payment
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.implicits._
+import org.baklanovsoft.shoppingcart.error.DomainError
 import org.baklanovsoft.shoppingcart.payment.CheckoutService.CheckoutError._
 import org.baklanovsoft.shoppingcart.payment.model._
 import org.baklanovsoft.shoppingcart.user.model._
@@ -12,7 +13,6 @@ import retry.RetryPolicies._
 import squants.market.Money
 
 import scala.concurrent.duration._
-import scala.util.control.NoStackTrace
 
 final case class CheckoutService[F[_]: MonadThrow: Retry: Background: Logger](
     paymentService: PaymentService[F],
@@ -85,10 +85,17 @@ final case class CheckoutService[F[_]: MonadThrow: Retry: Background: Logger](
 
 object CheckoutService {
 
-  sealed trait CheckoutError extends NoStackTrace
   object CheckoutError {
-    case class PaymentError(error: String) extends CheckoutError
-    case class OrderError(error: String)   extends CheckoutError
-    case object EmptyCartError             extends CheckoutError
+    case class PaymentError(error: String) extends DomainError {
+      val code = "PaymentError"; val status = 500; val description = error.some
+    }
+
+    case class OrderError(error: String) extends DomainError {
+      val code = "OrderError"; val status = 500; val description = error.some
+    }
+
+    case object EmptyCartError extends DomainError {
+      val code = "EmptyCartError"; val status = 400; val description = None
+    }
   }
 }

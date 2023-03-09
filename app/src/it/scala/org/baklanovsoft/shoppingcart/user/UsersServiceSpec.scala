@@ -1,10 +1,13 @@
 package org.baklanovsoft.shoppingcart.user
 
 import cats.effect.{IO, Resource}
+import org.baklanovsoft.shoppingcart.user.UsersService.{RoleExists, UserNotFound, UsernameExists}
 import org.baklanovsoft.shoppingcart.user.model.{ChangePassword, CreateUser, Password, Role, Username}
 import org.baklanovsoft.shoppingcart.util.Hash
 import skunk.Session
 import weaver.{GlobalRead, IOSuite, LowPriorityImplicits}
+
+import scala.util.Try
 
 class UsersServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImplicits {
   override type Res = UsersService[IO]
@@ -27,6 +30,10 @@ class UsersServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
       user1 <- usersService.find(username).map(_.get)
       _     <- expect(user1.username == username).failFast
 
+      // check username conflict error
+      conflict <- usersService.create(CreateUser(username, password)).attempt
+      _        <- expect(Try(conflict.swap.toOption.get.asInstanceOf[UsernameExists.type]).toOption.nonEmpty).failFast
+
       // hash correct
       expectedHash <- Hash[IO].calculate(password, user1.salt, user1.iterations)
       _            <- expect(user1.passwordHashed == expectedHash).failFast
@@ -43,6 +50,13 @@ class UsersServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
       _ <- expect(user2.passwordHashed != user1.passwordHashed).failFast
       _ <- expect(user2.salt != user1.salt).failFast
 
+    } yield assert(true)
+  }
+
+  test("UserNotFound error is thrown when updating the password") { usersService =>
+    for {
+      userNotFound <- usersService.updatePassword(ChangePassword(Username("sdkfoksdofkosd"), Password("123"))).attempt
+      _            <- expect(Try(userNotFound.swap.toOption.get.asInstanceOf[UserNotFound.type]).toOption.nonEmpty).failFast
     } yield assert(true)
   }
 
@@ -63,6 +77,10 @@ class UsersServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
       _     <- usersService.addRole(id, Role.Admin)
       user2 <- usersService.find(username).map(_.get)
       _     <- expect(user2.roles == Set(Role.User, Role.Admin)).failFast
+
+      // check role exists error
+      conflict <- usersService.addRole(id, Role.Admin).attempt
+      _        <- expect(Try(conflict.swap.toOption.get.asInstanceOf[RoleExists.type]).toOption.nonEmpty).failFast
 
       _     <- usersService.removeRole(id, Role.Admin)
       _     <- usersService.removeRole(id, Role.User)

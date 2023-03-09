@@ -3,11 +3,10 @@ package org.baklanovsoft.shoppingcart.user
 import cats.effect.Async
 import cats.effect.kernel.Resource
 import cats.implicits._
+import org.baklanovsoft.shoppingcart.error.DomainError
 import org.baklanovsoft.shoppingcart.user.model._
 import org.baklanovsoft.shoppingcart.util.{GenSalt, GenUUID, Hash}
 import skunk.Session
-
-import scala.util.control.NoStackTrace
 
 trait UsersService[F[_]] {
   def find(username: Username): F[Option[AuthUser]]
@@ -19,7 +18,17 @@ trait UsersService[F[_]] {
 
 object UsersService {
 
-  case object UserNotFound extends NoStackTrace
+  case object UserNotFound extends DomainError {
+    val code = "UserNotFound"; val status = 404; val description = None
+  }
+
+  case object UsernameExists extends DomainError {
+    val code = "UsernameExists"; val status = 409; val description = None
+  }
+
+  case object RoleExists extends DomainError {
+    val code = "RoleExists"; val status = 409; val description = None
+  }
 
   def make[F[_]: Async: GenUUID: GenSalt: Hash](sessionR: Resource[F, Session[F]]) = new UsersService[F] {
     import org.baklanovsoft.shoppingcart.user.sql.UsersSQL
@@ -54,6 +63,10 @@ object UsersService {
     ): F[UserId] =
       sessionR.use { s =>
         for {
+
+          check <- s.prepare(selectUser).flatMap(_.option(createUser.username))
+          _     <- Async[F].whenA(check.nonEmpty)(Async[F].raiseError(UsernameExists))
+
           uuid <- GenUUID[F].make.map(UserId.apply)
           salt <- GenSalt[F].make
 
@@ -96,8 +109,13 @@ object UsersService {
       } yield ()
     }
 
-    def addRole(userId: UserId, role: Role): F[Unit] =
-      sessionR.use(s => s.prepare(UsersSQL.addRole).flatMap(_.execute((userId, role)))).void
+    def addRole(userId: UserId, role: Role): F[Unit] = sessionR.use { s =>
+      for {
+        check <- s.prepare(UsersSQL.selectRoles).flatMap(_.stream(userId, 1024).compile.toList)
+        _     <- Async[F].whenA(check.contains(role))(Async[F].raiseError(RoleExists))
+        _     <- s.prepare(UsersSQL.addRole).flatMap(_.execute((userId, role)))
+      } yield ()
+    }
 
     def removeRole(userId: UserId, role: Role): F[Unit] =
       sessionR.use(s => s.prepare(UsersSQL.removeRole).flatMap(_.execute((userId, role)))).void
