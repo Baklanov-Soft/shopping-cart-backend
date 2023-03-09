@@ -3,6 +3,10 @@ ThisBuild / scalaVersion := "2.13.10"
 val org = "org.baklanovsoft"
 
 val assemblyStrategy = assembly / assemblyMergeStrategy := {
+  // to not apply local development override configurations
+  case PathList("params.conf")                                                      =>
+    MergeStrategy.discard
+
   // openapi docs generation
   case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
     MergeStrategy.singleOrError

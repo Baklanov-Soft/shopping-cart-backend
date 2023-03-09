@@ -1,15 +1,6 @@
 version: "3"
 
 services:
-  shopping-cart-backend:
-    #build: .
-    image: denisnovac/shopping-cart-backend:test-amd64
-    container_name: shopping-card-backend
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-
   db:
     image: postgres:alpine3.17
     container_name: db
@@ -17,4 +8,19 @@ services:
       - 5432:5432
     environment:
       POSTGRES_DB: shopping-cart
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: P@ssw0rd
+
+  shopping-cart-backend:
+    image: denisnovac/shopping-cart-backend:test-amd64
+    container_name: shopping-card-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_DB=shopping-cart
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=P@ssw0rd
+      - DATABASE_MIGRATE=true
