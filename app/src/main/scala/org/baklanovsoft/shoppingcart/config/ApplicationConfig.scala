@@ -1,6 +1,8 @@
 package org.baklanovsoft.shoppingcart.config
 
-case class ApplicationConfig()
+case class ApplicationConfig(
+    database: DatabaseConfig
+)
 
 case class DatabaseConfig(
     host: String = "db",

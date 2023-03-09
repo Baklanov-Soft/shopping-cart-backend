@@ -52,6 +52,7 @@ lazy val app =
         Dependencies.derevo,
         Dependencies.enumeratum,
         Dependencies.http4s,
+        Dependencies.pureconfig,
         Dependencies.refined,
         Dependencies.skunk,
         Dependencies.tapir
