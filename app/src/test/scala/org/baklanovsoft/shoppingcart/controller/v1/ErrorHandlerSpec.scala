@@ -23,7 +23,11 @@ object ErrorHandlerSpec extends SimpleIOSuite {
 
     for {
       handled <- ErrorHandler.withErrorHandler(iWillFail)
-    } yield expect(handled.swap.toOption.get == (StatusCode.NotFound, "TestError: Test error"))
+      _       <- expect(handled.swap.toOption.get == (StatusCode.NotFound, "TestError: Test error")).failFast
+
+      unknown <- ErrorHandler.withErrorHandler(IO.raiseError(new Error("Who am i?")))
+      _       <- expect(unknown.swap.toOption.get == (StatusCode.InternalServerError, "")).failFast
+    } yield assert(true)
 
   }
 }
