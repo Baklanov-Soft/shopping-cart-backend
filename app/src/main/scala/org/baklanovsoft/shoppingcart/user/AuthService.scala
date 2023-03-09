@@ -2,12 +2,10 @@ package org.baklanovsoft.shoppingcart.user
 
 import cats.effect.{Ref, Sync}
 import cats.implicits._
+import org.baklanovsoft.shoppingcart.error.DomainError
 import org.baklanovsoft.shoppingcart.user.model._
 import org.baklanovsoft.shoppingcart.util.{Base64, GenUUID, Hash}
 import org.typelevel.log4cats.{Logger, LoggerFactory}
-import sttp.model.StatusCode
-
-import scala.util.control.NoStackTrace
 
 trait AuthService[F[_]] {
   def findUser(token: JwtToken): F[Option[AuthUser]]
@@ -19,12 +17,14 @@ trait AuthService[F[_]] {
 
 object AuthService {
 
-  sealed trait AuthErrors extends NoStackTrace {
-    def statusCode: StatusCode
-  }
   object AuthErrors {
-    case object UserNotFound      extends AuthErrors { override val statusCode: StatusCode = StatusCode.NotFound  }
-    case object IncorrectPassword extends AuthErrors { override val statusCode: StatusCode = StatusCode.Forbidden }
+    case object UserNotFound extends DomainError {
+      val code = "UserNotFound"; val status = 404; val description = None
+    }
+
+    case object IncorrectPassword extends DomainError {
+      val code = "IncorrectPassword"; val status = 403; val description = None
+    }
   }
 
   def make[F[_]: Sync: LoggerFactory: Base64: Hash](usersService: UsersService[F]): F[AuthService[F]] =

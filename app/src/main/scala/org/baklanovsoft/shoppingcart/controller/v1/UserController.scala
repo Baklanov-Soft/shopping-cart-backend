@@ -8,8 +8,10 @@ import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.model.StatusCode
 import sttp.tapir._
 import sttp.tapir.json.circe.jsonBody
+import ErrorHandler._
+import org.typelevel.log4cats.{Logger, LoggerFactory}
 
-final case class UserController[F[_]: MonadThrow](auth: Auth[F]) extends Controller[F] {
+final case class UserController[F[_]: MonadThrow: Logger] private (auth: Auth[F]) extends Controller[F] {
 
   private val check =
     UserController.check.serverLogic { username =>
@@ -22,7 +24,7 @@ final case class UserController[F[_]: MonadThrow](auth: Auth[F]) extends Control
 
   private val login =
     UserController.login.serverLogic { loginUser =>
-      auth.login(loginUser)
+      withErrorHandler(auth.login(loginUser))
     }
 
   private val logout =
@@ -37,11 +39,8 @@ final case class UserController[F[_]: MonadThrow](auth: Auth[F]) extends Control
 
   private val resister =
     UserController.register
-      .serverLogicSuccess { createUser =>
-        auth
-          .register(createUser)
-          .map(t => t -> StatusCode.Ok)
-
+      .serverLogic { createUser =>
+        withErrorHandler(auth.register(createUser))
       }
 
   override val routes = List(
@@ -53,6 +52,12 @@ final case class UserController[F[_]: MonadThrow](auth: Auth[F]) extends Control
 }
 
 object UserController extends RestCodecs {
+
+  def make[F[_]: MonadThrow: LoggerFactory](auth: Auth[F]) = {
+    implicit val l = LoggerFactory.getLogger[F]
+    UserController[F](auth)
+  }
+
   private val tag  = "Auth"
   private val base = Routes.base / "auth"
 
@@ -71,6 +76,8 @@ object UserController extends RestCodecs {
       .in(base / "login")
       .in(jsonBody[LoginUser])
       .out(jsonBody[JwtToken])
+      .errorOut(statusCode)
+      .errorOut(plainBody[String])
       .tag(tag)
       .summary("Login")
 
@@ -86,7 +93,8 @@ object UserController extends RestCodecs {
       .in(base / "register")
       .in(jsonBody[CreateUser])
       .out(jsonBody[JwtToken])
-      .out(statusCode)
+      .errorOut(statusCode)
+      .errorOut(plainBody[String])
       .tag(tag)
       .summary("Register a new user")
 
