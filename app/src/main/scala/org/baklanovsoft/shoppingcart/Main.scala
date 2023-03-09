@@ -3,7 +3,7 @@ package org.baklanovsoft.shoppingcart
 import cats.effect._
 import cats.effect.std.Supervisor
 import com.comcast.ip4s._
-import org.baklanovsoft.shoppingcart.config.DatabaseConfig
+import org.baklanovsoft.shoppingcart.config.ApplicationConfig
 import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.jdbc.Database
 import org.baklanovsoft.shoppingcart.user.{AuthService, UsersService}
@@ -11,6 +11,8 @@ import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
+import pureconfig.generic.auto._
+import pureconfig.module.catseffect._
 
 import scala.concurrent.duration._
 
@@ -20,9 +22,8 @@ object Main extends IOApp {
   private val items  = ItemsController[IO](DummyServices.itemsService)
   private val health = HealthController[IO](DummyServices.healthService)
 
-  private val dbConfig = DatabaseConfig(
-    database = "shopping-cart"
-  )
+  private val configR: Resource[IO, ApplicationConfig] =
+    Resource.eval(loadConfigF[IO, ApplicationConfig])
 
   private def serverR(routes: Routes[IO]): Resource[IO, Server] = {
     val router: HttpApp[IO] = Router.apply[IO]("/" -> routes.http4sRoutes).orNotFound
@@ -39,7 +40,9 @@ object Main extends IOApp {
   private val resource = for {
     implicit0(s: Supervisor[IO]) <- Supervisor[IO]
 
-    pool <- Database.make[IO](dbConfig)
+    config <- configR
+
+    pool <- Database.make[IO](config.database)
 
     usersService = UsersService.make[IO](pool)
     authService <- Resource.eval(AuthService.make[IO](usersService))
