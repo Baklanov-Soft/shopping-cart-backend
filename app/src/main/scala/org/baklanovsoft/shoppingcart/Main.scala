@@ -7,7 +7,7 @@ import org.baklanovsoft.shoppingcart.catalog.{BrandsService, CategoriesService, 
 import org.baklanovsoft.shoppingcart.config.ApplicationConfig
 import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.jdbc.Database
-import org.baklanovsoft.shoppingcart.user.{AuthService, UsersService}
+import org.baklanovsoft.shoppingcart.user.{AdminInitService, AuthService, UsersService}
 import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
@@ -72,6 +72,8 @@ object Main extends IOApp {
     pool <- Database.make[IO](config.database)
 
     usersService = UsersService.make[IO](pool)
+    _           <- Resource.eval(AdminInitService.makeAdminUser[IO](config.admin, usersService))
+
     authService <- Resource.eval(AuthService.make[IO](usersService))
 
     categoriesService = CategoriesService.make[IO](pool)

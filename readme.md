@@ -1,12 +1,25 @@
 # shopping-cart-backend
 
-Usage:
-`docker-compose up -d`
+Project of shopping cart made while reading **Practical FP in Scala** by Gabriel Volpe, second edition.
 
-Note: `docker-compose.yml` is using `linux/amd64` arch by default, see other tags on docker hub
+Usage: `docker-compose up -d`
 
-OpenAPI docs:
-`localhost:8080/api/v1/docs`
+Note: `docker-compose.yml` is using `linux/amd64` arch by default, see other tags on docker hub.
+
+OpenAPI docs are exposed on route: `localhost:8080/api/v1/docs`
+
+### Environment variables for container:
+
+- Database:
+    - DATABASE_HOST - host of postgres, should be equal to service name if runned in the same docker compose file;
+    - DATABASE_PORT - port of postgres;
+    - DATABASE_DB - name of the database, should be created before running the service;
+    - DATABASE_USER - name of database user;
+    - DATABASE_PASSWORD - password of database user;
+    - DATABASE_MIGRATE - if set to `false` - app won't do the migration at the start.
+- Service:
+    - ADMIN_NAME - name of the initial admin user (will be created after migrations);
+    - ADMIN_PASSWORD - password of the initial user.
 
 Container repo:
 https://hub.docker.com/repository/docker/denisnovac/shopping-cart-backend/general

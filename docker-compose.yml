@@ -24,3 +24,5 @@ services:
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=P@ssw0rd
       - DATABASE_MIGRATE=true
+      - ADMIN_NAME=admin
+      - ADMIN_PASSWORD=admin
