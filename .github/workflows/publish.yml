@@ -1,4 +1,4 @@
-name: publish master
+name: publish build
 
 on:
   push:
@@ -34,9 +34,17 @@ jobs:
 
       - name: Push image
         run: |
+          
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-          VERSION=master
+          
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          
+          # make version be equal to branch name (in case we want to have several branches to push container)
+          VERSION=$GITHUB_REF_NAME
+          
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
+          
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
