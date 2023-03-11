@@ -1,7 +1,8 @@
 package org.baklanovsoft.shoppingcart.config
 
 case class ApplicationConfig(
-    database: DatabaseConfig
+    database: DatabaseConfig,
+    admin: AdminConfig
 )
 
 case class DatabaseConfig(
@@ -11,4 +12,9 @@ case class DatabaseConfig(
     password: String = "postgres",
     database: String,
     migrateOnStart: Boolean = true
+)
+
+case class AdminConfig(
+    name: String = "admin",
+    password: String = "admin"
 )
