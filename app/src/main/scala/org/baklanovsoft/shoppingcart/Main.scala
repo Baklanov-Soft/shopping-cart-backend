@@ -11,9 +11,13 @@ import org.baklanovsoft.shoppingcart.user.{AuthService, UsersService}
 import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
+import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect._
+import sttp.tapir.server.http4s.Http4sServerOptions
+import sttp.tapir.server.interceptor.cors.{CORSConfig, CORSInterceptor}
+import sttp.tapir.server.interceptor.log.DefaultServerLog
 
 import scala.concurrent.duration._
 
@@ -25,7 +29,31 @@ object Main extends IOApp {
     Resource.eval(loadConfigF[IO, ApplicationConfig])
 
   private def serverR(routes: Routes[IO]): Resource[IO, Server] = {
-    val router: HttpApp[IO] = Router.apply[IO]("/" -> routes.http4sRoutes).orNotFound
+    val logger = LoggerFactory.getLoggerFromName[IO]("EmberServer")
+
+    val logSettings =
+      DefaultServerLog(
+        doLogWhenReceived = s => logger.debug(s),
+        doLogWhenHandled = (s, t) => t.fold(logger.debug(s))(logger.error(_)(s)),
+        doLogAllDecodeFailures = (s, t) => t.fold(logger.debug(s))(logger.error(_)(s)),
+        doLogExceptions = (s, t) => logger.error(t)(s),
+        noLog = IO.unit
+      )
+
+    val corsSettings =
+      CORSInterceptor
+        .customOrThrow[IO](
+          CORSConfig.default.allowAllOrigins.allowAllHeaders.allowAllMethods
+        )
+
+    val options =
+      Http4sServerOptions
+        .customiseInterceptors[IO]
+        .corsInterceptor(corsSettings)
+        .serverLog(logSettings)
+        .options
+
+    val router: HttpApp[IO] = Router.apply[IO]("/" -> routes.http4sRoutes(options)).orNotFound
 
     EmberServerBuilder
       .default[IO]
