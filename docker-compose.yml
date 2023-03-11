@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: P@ssw0rd
 
   shopping-cart-backend:
-    image: denisnovac/shopping-cart-backend:test-amd64
+    image: ghcr.io/baklanov-soft/shopping-cart-backend:master
     container_name: shopping-card-backend
     ports:
       - "8080:8080"

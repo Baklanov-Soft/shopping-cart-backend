@@ -26,6 +26,12 @@ jobs:
         with:
           java-version: 17
 
+      - name: run tests
+        run: sbt test
+
+      - name: run integration tests
+        run: sbt it:test
+
       - name: Assembly
         run: sbt assembly
 
