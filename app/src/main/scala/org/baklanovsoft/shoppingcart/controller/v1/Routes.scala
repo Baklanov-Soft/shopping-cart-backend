@@ -56,6 +56,7 @@ object Routes extends RestCodecs {
   private val api     = "api"
   private val version = "v1"
   private val title   = "Shopping Cart"
+  val adminTag        = "Admin"
 
   private[v1] val base = api / version
 

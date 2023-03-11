@@ -40,6 +40,9 @@ final case class Auth[F[_]: Functor](
     authWithStatusAndToken(roles)(jwtToken)
       .map(_.map(_._2))
 
+  def authWithStatus(role: Role*)(jwtToken: JwtToken): F[Either[EndpointError, AuthUser]] =
+    authWithStatus(Set.from(role).some)(jwtToken)
+
   /* Those methods are just checking the login with default tapir forbidden error, no roles check so no status needed */
 
   def auth(jwtToken: JwtToken): F[Either[Unit, AuthUser]] =

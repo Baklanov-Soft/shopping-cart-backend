@@ -19,7 +19,7 @@ import java.util.UUID
 
 object DummyServices {
 
-  val itemsService = new ItemsService[IO] {
+  private val itemsService = new ItemsService[IO] {
 
     private val item = Item(
       uuid = ItemId(UUID.randomUUID()),

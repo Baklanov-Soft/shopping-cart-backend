@@ -1,7 +1,6 @@
 package org.baklanovsoft.shoppingcart.controller.v1
 
 import cats.MonadThrow
-import cats.implicits._
 import org.baklanovsoft.shoppingcart.catalog.CategoriesService
 import org.baklanovsoft.shoppingcart.catalog.model.{Category, CategoryId, CategoryName}
 import org.baklanovsoft.shoppingcart.controller.v1.ErrorHandler._
@@ -24,7 +23,7 @@ final case class CategoriesController[F[_]: MonadThrow: Logger] private (
 
   private val post =
     CategoriesController.post
-      .serverSecurityLogic(auth.authWithStatus(Set.apply[Role](Role.Admin).some))
+      .serverSecurityLogic(auth.authWithStatus(Role.Admin))
       .serverLogic { _ => c =>
         withErrorHandler(
           categoriesService.create(c)
@@ -64,7 +63,7 @@ object CategoriesController extends RestCodecs {
       .out(plainBody[CategoryId])
       .errorOut(statusCode)
       .errorOut(plainBody[String])
-      .tag(tag)
+      .tag(Routes.adminTag)
       .summary("Add category")
 
 }

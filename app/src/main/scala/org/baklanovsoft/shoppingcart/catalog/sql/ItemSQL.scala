@@ -63,6 +63,9 @@ object ItemSQL {
   val selectById: Query[ItemId, Item] =
     (selectFragment ~> sql"WHERE i.uuid = $itemId").query(decoder)
 
+  val selectByName: Query[ItemName, Item] =
+    (selectFragment ~> sql"WHERE i.name = $itemName").query(decoder)
+
   val insertItem: Command[ItemId ~ CreateItem] =
     sql"""
          INSERT INTO items

@@ -1,7 +1,6 @@
 package org.baklanovsoft.shoppingcart.controller.v1
 
 import cats.MonadThrow
-import cats.implicits._
 import org.baklanovsoft.shoppingcart.catalog.BrandsService
 import org.baklanovsoft.shoppingcart.catalog.model.{Brand, BrandId, BrandName}
 import org.baklanovsoft.shoppingcart.controller.v1.ErrorHandler._
@@ -24,7 +23,7 @@ final case class BrandsController[F[_]: MonadThrow: Logger] private (
 
   private val post =
     BrandsController.post
-      .serverSecurityLogic(auth.authWithStatus(Set.apply[Role](Role.Admin).some))
+      .serverSecurityLogic(auth.authWithStatus(Role.Admin))
       .serverLogic { _ => b =>
         withErrorHandler(
           brandsService.create(b)
@@ -64,7 +63,7 @@ object BrandsController extends RestCodecs {
       .out(plainBody[BrandId])
       .errorOut(statusCode)
       .errorOut(plainBody[String])
-      .tag(tag)
+      .tag(Routes.adminTag)
       .summary("Add brand")
 
 }
