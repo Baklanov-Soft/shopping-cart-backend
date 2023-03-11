@@ -7,7 +7,7 @@ import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
 import sttp.apispec.openapi.circe.yaml._
 import sttp.tapir._
 import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
-import sttp.tapir.server.http4s.Http4sServerInterpreter
+import sttp.tapir.server.http4s.{Http4sServerInterpreter, Http4sServerOptions}
 import sttp.tapir.swagger.{SwaggerUI, SwaggerUIOptions}
 
 final case class Routes[F[_]: Async](
@@ -48,8 +48,8 @@ final case class Routes[F[_]: Async](
     Http4sServerInterpreter[F]()
       .toRoutes(SwaggerUI[F](docs, SwaggerUIOptions.default.pathPrefix(List(Routes.api, Routes.version, "docs"))))
 
-  val http4sRoutes =
-    Http4sServerInterpreter[F]().toRoutes(routes) <+> docsRoute
+  def http4sRoutes(serverOptions: Http4sServerOptions[F]) =
+    Http4sServerInterpreter[F](serverOptions).toRoutes(routes) <+> docsRoute
 }
 
 object Routes extends RestCodecs {
