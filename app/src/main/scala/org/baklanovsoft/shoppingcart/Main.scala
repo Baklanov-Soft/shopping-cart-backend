@@ -3,6 +3,7 @@ package org.baklanovsoft.shoppingcart
 import cats.effect._
 import cats.effect.std.Supervisor
 import com.comcast.ip4s._
+import org.baklanovsoft.shoppingcart.catalog.{BrandsService, CategoriesService, ItemsService}
 import org.baklanovsoft.shoppingcart.config.ApplicationConfig
 import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.jdbc.Database
@@ -18,8 +19,6 @@ import scala.concurrent.duration._
 
 object Main extends IOApp {
 
-  private val brands = BrandsController[IO](DummyServices.brandsService)
-  private val items  = ItemsController[IO](DummyServices.itemsService)
   private val health = HealthController[IO](DummyServices.healthService)
 
   private val configR: Resource[IO, ApplicationConfig] =
@@ -47,13 +46,22 @@ object Main extends IOApp {
     usersService = UsersService.make[IO](pool)
     authService <- Resource.eval(AuthService.make[IO](usersService))
 
-    auth           = Auth[IO](authService)
+    categoriesService = CategoriesService.make[IO](pool)
+    brandsService     = BrandsService.make[IO](pool)
+    itemsService      = ItemsService.make[IO](pool)
+
+    auth = Auth[IO](authService)
+
     userController = UserController.make[IO](auth)
     shoppingCart   = ShoppingCartController[IO](auth, DummyServices.shoppingCartService)
     orders         = OrdersController[IO](auth, DummyServices.ordersService)
 
+    categories = CategoriesController.make[IO](auth, categoriesService)
+    brands     = BrandsController.make[IO](auth, brandsService)
+    items      = ItemsController.make[IO](auth, itemsService)
+
     checkout = CheckoutController.make[IO](auth, DummyServices.checkoutService)
-    routes   = Routes[IO](health, userController, brands, items, shoppingCart, orders, checkout)
+    routes   = Routes[IO](health, userController, categories, brands, items, shoppingCart, orders, checkout)
 
     _ <- serverR(routes)
   } yield ()

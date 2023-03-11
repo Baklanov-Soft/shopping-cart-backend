@@ -14,7 +14,7 @@ final case class CheckoutController[F[_]: Sync: Logger] private (auth: Auth[F], 
 
   private val checkout =
     CheckoutController.checkout
-      .serverSecurityLogic(auth.authWithStatus)
+      .serverSecurityLogic(auth.authWithStatus())
       .serverLogic { user => card =>
         withErrorHandler(
           checkoutService

@@ -19,14 +19,7 @@ import java.util.UUID
 
 object DummyServices {
 
-  val brandsService = new BrandsService[IO] {
-    private val brand = Brand(uuid = BrandId(UUID.randomUUID()), name = BrandName("test"))
-
-    override def findAll: IO[List[Brand]]             = IO.pure(List(brand))
-    override def create(name: BrandName): IO[BrandId] = IO.pure(BrandId(UUID.randomUUID()))
-  }
-
-  val itemsService = new ItemsService[IO] {
+  private val itemsService = new ItemsService[IO] {
 
     private val item = Item(
       uuid = ItemId(UUID.randomUUID()),

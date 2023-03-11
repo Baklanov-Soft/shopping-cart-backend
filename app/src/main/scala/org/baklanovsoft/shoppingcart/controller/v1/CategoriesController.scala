@@ -1,8 +1,8 @@
 package org.baklanovsoft.shoppingcart.controller.v1
 
 import cats.MonadThrow
-import org.baklanovsoft.shoppingcart.catalog.BrandsService
-import org.baklanovsoft.shoppingcart.catalog.model.{Brand, BrandId, BrandName}
+import org.baklanovsoft.shoppingcart.catalog.CategoriesService
+import org.baklanovsoft.shoppingcart.catalog.model.{Category, CategoryId, CategoryName}
 import org.baklanovsoft.shoppingcart.controller.v1.ErrorHandler._
 import org.baklanovsoft.shoppingcart.user.model.Role
 import org.baklanovsoft.shoppingcart.util.rest.RestCodecs
@@ -10,23 +10,23 @@ import org.typelevel.log4cats.{Logger, LoggerFactory}
 import sttp.tapir._
 import sttp.tapir.json.circe._
 
-final case class BrandsController[F[_]: MonadThrow: Logger] private (
+final case class CategoriesController[F[_]: MonadThrow: Logger] private (
     auth: Auth[F],
-    brandsService: BrandsService[F]
+    categoriesService: CategoriesService[F]
 ) extends Controller[F] {
 
   private val get =
-    BrandsController.get
+    CategoriesController.get
       .serverLogicSuccess { _ =>
-        brandsService.findAll
+        categoriesService.findAll
       }
 
   private val post =
-    BrandsController.post
+    CategoriesController.post
       .serverSecurityLogic(auth.authWithStatus(Role.Admin))
-      .serverLogic { _ => b =>
+      .serverLogic { _ => c =>
         withErrorHandler(
-          brandsService.create(b)
+          categoriesService.create(c)
         )
       }
 
@@ -36,34 +36,34 @@ final case class BrandsController[F[_]: MonadThrow: Logger] private (
   )
 }
 
-object BrandsController extends RestCodecs {
+object CategoriesController extends RestCodecs {
 
   def make[F[_]: MonadThrow: LoggerFactory](
       auth: Auth[F],
-      brandsService: BrandsService[F]
-  ): BrandsController[F] = {
+      categoriesService: CategoriesService[F]
+  ): CategoriesController[F] = {
     implicit val l = LoggerFactory.getLogger[F]
-    BrandsController[F](auth, brandsService)
+    CategoriesController[F](auth, categoriesService)
   }
 
-  private val tag  = "Brands"
-  private val base = Routes.base / "brands"
+  private val tag  = "Categories"
+  private val base = Routes.base / "categories"
 
   private val get =
     endpoint.get
       .in(base)
-      .out(jsonBody[List[Brand]])
+      .out(jsonBody[List[Category]])
       .tag(tag)
-      .summary("Get all brands")
+      .summary("Get all categories")
 
   private val post =
     Routes.secureEndpoint.post
       .in(base)
-      .in(query[BrandName]("brandName"))
-      .out(plainBody[BrandId])
+      .in(query[CategoryName]("categoryName"))
+      .out(plainBody[CategoryId])
       .errorOut(statusCode)
       .errorOut(plainBody[String])
       .tag(Routes.adminTag)
-      .summary("Add brand")
+      .summary("Add category")
 
 }

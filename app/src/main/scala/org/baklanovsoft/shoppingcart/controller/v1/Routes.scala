@@ -13,6 +13,7 @@ import sttp.tapir.swagger.{SwaggerUI, SwaggerUIOptions}
 final case class Routes[F[_]: Async](
     healthController: HealthController[F],
     userController: UserController[F],
+    categoriesController: CategoriesController[F],
     brandsController: BrandsController[F],
     itemsController: ItemsController[F],
     shoppingCartController: ShoppingCartController[F],
@@ -26,6 +27,7 @@ final case class Routes[F[_]: Async](
     List(
       healthController,
       userController,
+      categoriesController,
       brandsController,
       itemsController,
       shoppingCartController,
@@ -54,6 +56,7 @@ object Routes extends RestCodecs {
   private val api     = "api"
   private val version = "v1"
   private val title   = "Shopping Cart"
+  val adminTag        = "Admin"
 
   private[v1] val base = api / version
 

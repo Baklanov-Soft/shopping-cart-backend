@@ -16,6 +16,7 @@ final case class Item(
     category: Category
 )
 
+@derive(codec, schema)
 final case class CreateItem(
     name: ItemName,
     description: ItemDescription,
@@ -24,6 +25,7 @@ final case class CreateItem(
     categoryId: CategoryId
 )
 
+@derive(codec, schema)
 final case class UpdateItem(
     id: ItemId,
     price: Money
