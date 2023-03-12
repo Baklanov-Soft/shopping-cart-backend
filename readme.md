@@ -10,16 +10,29 @@ OpenAPI docs are exposed on route: `localhost:8080/api/v1/docs`
 
 ### Environment variables for container:
 
-- Database:
-    - DATABASE_HOST - host of postgres, should be equal to service name if runned in the same docker compose file;
-    - DATABASE_PORT - port of postgres;
-    - DATABASE_DB - name of the database, should be created before running the service;
-    - DATABASE_USER - name of database user;
-    - DATABASE_PASSWORD - password of database user;
-    - DATABASE_MIGRATE - if set to `false` - app won't do the migration at the start.
-- Service:
-    - ADMIN_NAME - name of the initial admin user (will be created after migrations);
-    - ADMIN_PASSWORD - password of the initial user.
+Database:
+
+- DATABASE_HOST - host of postgres, should be equal to service name if runned in the same docker compose file;
+- DATABASE_PORT - port of postgres;
+- DATABASE_DB - name of the database, should be created before running the service;
+- DATABASE_USER - name of database user;
+- DATABASE_PASSWORD - password of database user;
+- DATABASE_MIGRATE - if set to `false` - app won't do the migration at the start.
+
+Redis:
+
+- REDIS_URL - url for connection to redis.
+
+Http:
+
+- HTTP_HOST - host of local http server (default 0.0.0.0);
+- HTTP_PORT - port of local http server (default 8080);
+- HTTP_CORS_ALLOWED_ORIGINS - list of allowed CORS origins, empty list by default means all origins allowed.
+
+App:
+
+- ADMIN_NAME - name of the initial admin user (will be created after migrations);
+- ADMIN_PASSWORD - password of the initial user.
 
 Container repo:
 https://hub.docker.com/repository/docker/denisnovac/shopping-cart-backend/general

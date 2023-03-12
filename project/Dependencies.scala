@@ -104,7 +104,8 @@ object Dependencies {
 
   val redis4cats = Seq(
     "dev.profunktor" %% "redis4cats-core",
-    "dev.profunktor" %% "redis4cats-effects"
+    "dev.profunktor" %% "redis4cats-effects",
+    "dev.profunktor" %% "redis4cats-log4cats"
   ).map(_ % Versions.redis4cats)
 
   val refined = Seq(

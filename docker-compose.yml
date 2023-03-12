@@ -2,13 +2,19 @@ version: "3"
 
 services:
   db:
-    image: postgres:alpine3.17
+    image: postgres:alpine
     container_name: db
     ports:
       - 5432:5432
     environment:
       POSTGRES_DB: shopping-cart
       POSTGRES_PASSWORD: P@ssw0rd
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - 6379:6379
 
   shopping-cart-backend:
     image: ghcr.io/baklanov-soft/shopping-cart-backend:master
@@ -17,7 +23,9 @@ services:
       - "8080:8080"
     depends_on:
       - db
+      - redis
     environment:
+      - REDIS_URL=redis://redis:6379
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
       - DATABASE_DB=shopping-cart
