@@ -33,7 +33,7 @@ object Main extends IOApp {
     usersService = UsersService.make[IO](pool)
     _           <- Resource.eval(AdminInitService.makeAdminUser[IO](config.admin, usersService))
 
-    authService <- Resource.eval(AuthService.make[IO](usersService))
+    authService = AuthService.make[IO](usersService, redis)
 
     categoriesService = CategoriesService.make[IO](pool)
     brandsService     = BrandsService.make[IO](pool)
