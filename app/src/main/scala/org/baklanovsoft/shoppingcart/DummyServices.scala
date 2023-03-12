@@ -5,7 +5,6 @@ import cats.effect.std.Supervisor
 import cats.implicits._
 import org.baklanovsoft.shoppingcart.catalog._
 import org.baklanovsoft.shoppingcart.catalog.model._
-import org.baklanovsoft.shoppingcart.health._
 import org.baklanovsoft.shoppingcart.payment._
 import org.baklanovsoft.shoppingcart.payment.model._
 import org.baklanovsoft.shoppingcart.user.model._
@@ -17,12 +16,6 @@ import squants.market.{Money, USD}
 import java.util.UUID
 
 object DummyServices {
-
-  val healthService = new HealthService[IO] {
-    override def status: IO[AppHealth] = IO(
-      AppHealth(RedisStatus(Status.Unreachable), PostgresStatus(Status.Unreachable))
-    )
-  }
 
   def shoppingCartService(itemsService: ItemsService[IO]) = new ShoppingCartService[IO] {
 
