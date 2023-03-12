@@ -9,7 +9,7 @@ import org.baklanovsoft.shoppingcart.health.HealthService
 import org.baklanovsoft.shoppingcart.http.HttpServer
 import org.baklanovsoft.shoppingcart.jdbc.Database
 import org.baklanovsoft.shoppingcart.payment.OrdersService
-import org.baklanovsoft.shoppingcart.redis.RedisConnect
+import org.baklanovsoft.shoppingcart.redis.Redis
 import org.baklanovsoft.shoppingcart.user.{AdminInitService, AuthService, UsersService}
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
 import pureconfig.generic.auto._
@@ -26,7 +26,7 @@ object Main extends IOApp {
     config <- configR
 
     pool  <- Database.make[IO](config.database)
-    redis <- RedisConnect.make[IO](config.redis)
+    redis <- Redis.make[IO](config.redis)
 
     /* Services */
 

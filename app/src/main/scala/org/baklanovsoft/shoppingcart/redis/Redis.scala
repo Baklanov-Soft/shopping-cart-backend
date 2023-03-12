@@ -6,11 +6,11 @@ import cats.effect.kernel.Resource
 import cats.implicits._
 import dev.profunktor.redis4cats.effect.{Log, MkRedis}
 import dev.profunktor.redis4cats.log4cats.log4CatsInstance
-import dev.profunktor.redis4cats.{Redis, RedisCommands}
+import dev.profunktor.redis4cats.{Redis => RedisConnector, RedisCommands}
 import org.baklanovsoft.shoppingcart.config.RedisConfig
 import org.typelevel.log4cats.{Logger, LoggerFactory}
 
-final case class RedisConnect[F[_]: MkRedis: MonadThrow: Logger] private (cfg: RedisConfig) {
+final case class Redis[F[_]: MkRedis: MonadThrow: Logger] private (cfg: RedisConfig) {
 
   private def checkConnection(redis: RedisCommands[F, String, String]): F[Unit] =
     redis.info.flatMap {
@@ -18,13 +18,13 @@ final case class RedisConnect[F[_]: MkRedis: MonadThrow: Logger] private (cfg: R
     }
 
   private def connect: Resource[F, RedisCommands[F, String, String]] =
-    Redis[F]
+    RedisConnector[F]
       .utf8(cfg.url)
       .evalTap(checkConnection)
 
 }
 
-object RedisConnect {
+object Redis {
 
   def make[F[_]: LoggerFactory: Async](
       cfg: RedisConfig
@@ -33,7 +33,7 @@ object RedisConnect {
     implicit val rl: Log[F]          = log4CatsInstance[F]
     implicit val mkRedis: MkRedis[F] = MkRedis.forAsync[F]
 
-    RedisConnect[F](cfg).connect
+    Redis[F](cfg).connect
   }
 
 }
