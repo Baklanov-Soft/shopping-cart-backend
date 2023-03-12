@@ -9,7 +9,7 @@ import natchez.Trace.Implicits.noop
 import org.baklanovsoft.shoppingcart.config.DatabaseConfig
 import org.typelevel.log4cats.{Logger, LoggerFactory}
 import retry.RetryPolicies._
-import retry.{RetryDetails, retryingOnAllErrors}
+import retry.{RetryDetails, retryingOnSomeErrors}
 import skunk.Session
 import skunk.codec.all.text
 import skunk.implicits._
@@ -21,10 +21,18 @@ final case class Database[F[_]: Async: Console: Logger] private (dbConfig: Datab
 
   private val flywayUrl = s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.database}"
 
-  private val policy = limitRetries[F](5) |+| exponentialBackoff[F](5.seconds)
+  private val policy = limitRetries[F](5) |+| constantDelay[F](10.seconds)
 
   private def onError(e: Throwable, d: RetryDetails) =
-    Logger[F].warn(s"Migration failed with error ${e.getMessage} \nRetry details: $d")
+    Logger[F].warn(
+      s"Migration failed with error ${e.getMessage} \nretries: ${d.retriesSoFar}/5 \nwill retry: ${!d.givingUp}\nnext retry in ${d.upcomingDelay
+          .map(_.toSeconds)} seconds"
+    )
+
+  // retry only on connection error (waiting for database)
+  private def isWorthRetrying: Throwable => F[Boolean] = { t =>
+    Async[F].delay(t.getMessage.contains("Unable to obtain connection from database"))
+  }
 
   private val migration: F[Unit] =
     Fly4s
@@ -39,7 +47,7 @@ final case class Database[F[_]: Async: Console: Logger] private (dbConfig: Datab
       )
       .onFinalize(Logger[F].info("Fly4s connection resource is closed"))
       // to close the connection right after migration, not after app completes
-      .use(r => retryingOnAllErrors.apply(policy, onError)(r.migrate))
+      .use(r => retryingOnSomeErrors.apply(policy, isWorthRetrying, onError)(r.migrate))
       .void
 
   private def checkPostgresConnection(

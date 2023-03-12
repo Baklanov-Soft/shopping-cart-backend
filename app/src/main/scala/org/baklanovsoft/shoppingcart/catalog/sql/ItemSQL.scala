@@ -19,7 +19,7 @@ object ItemSQL {
   val itemDesc =
     varchar.imap[ItemDescription](ItemDescription.apply)(_.value)
 
-  val money =
+  val money: Codec[Money] =
     (numeric ~ varchar(3)).imap[Money] { case (amount, currency) =>
       Money(amount, currency)(defaultMoneyContext).toOption.get
     }(m => (m.amount, m.currency.code))

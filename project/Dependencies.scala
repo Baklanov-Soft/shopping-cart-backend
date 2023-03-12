@@ -113,7 +113,8 @@ object Dependencies {
   ).map(_ % Versions.refined)
 
   val skunk = Seq(
-    "org.tpolecat" %% "skunk-core"
+    "org.tpolecat" %% "skunk-core",
+    "org.tpolecat" %% "skunk-circe"
   ).map(_ % Versions.skunk)
 
   val squants = "org.typelevel" %% "squants" % Versions.squants
