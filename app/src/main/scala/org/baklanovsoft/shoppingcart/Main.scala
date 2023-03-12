@@ -76,21 +76,24 @@ object Main extends IOApp {
 
     authService <- Resource.eval(AuthService.make[IO](usersService))
 
-    categoriesService = CategoriesService.make[IO](pool)
-    brandsService     = BrandsService.make[IO](pool)
-    itemsService      = ItemsService.make[IO](pool)
+    categoriesService   = CategoriesService.make[IO](pool)
+    brandsService       = BrandsService.make[IO](pool)
+    itemsService        = ItemsService.make[IO](pool)
+    shoppingCartService = DummyServices.shoppingCartService(itemsService)
 
     auth = Auth[IO](authService)
 
     userController = UserController.make[IO](auth)
-    shoppingCart   = ShoppingCartController[IO](auth, DummyServices.shoppingCartService)
-    orders         = OrdersController[IO](auth, DummyServices.ordersService)
+
+    shoppingCart = ShoppingCartController[IO](auth, shoppingCartService)
+    orders       = OrdersController[IO](auth, DummyServices.ordersService)
 
     categories = CategoriesController.make[IO](auth, categoriesService)
     brands     = BrandsController.make[IO](auth, brandsService)
     items      = ItemsController.make[IO](auth, itemsService)
 
-    checkout = CheckoutController.make[IO](auth, DummyServices.checkoutService)
+    checkout =
+      CheckoutController.make[IO](auth, DummyServices.checkoutService(shoppingCartService))
     routes   = Routes[IO](health, userController, categories, brands, items, shoppingCart, orders, checkout)
 
     _ <- serverR(routes)

@@ -19,45 +19,13 @@ import java.util.UUID
 
 object DummyServices {
 
-  private val itemsService = new ItemsService[IO] {
-
-    private val item = Item(
-      uuid = ItemId(UUID.randomUUID()),
-      name = ItemName("test"),
-      description = ItemDescription("test"),
-      price = Money.apply(BigDecimal.decimal(100.5), USD),
-      brand = Brand(uuid = BrandId(UUID.randomUUID()), name = BrandName("test")),
-      category = Category(uuid = CategoryId(UUID.randomUUID()), name = CategoryName("test"))
-    )
-
-    override def findAll: IO[
-      List[Item]
-    ] = IO(List(item))
-
-    override def findBy(brand: BrandName): IO[
-      List[Item]
-    ] = IO(List(item))
-
-    override def findById(
-        itemId: ItemId
-    ): IO[Option[Item]] = IO(item.some)
-
-    override def create(
-        item: CreateItem
-    ): IO[ItemId] = IO(ItemId(UUID.randomUUID()))
-
-    override def update(
-        item: UpdateItem
-    ): IO[Unit] = IO.unit
-  }
-
   val healthService = new HealthService[IO] {
     override def status: IO[AppHealth] = IO(
       AppHealth(RedisStatus(Status.Unreachable), PostgresStatus(Status.Unreachable))
     )
   }
 
-  val shoppingCartService = new ShoppingCartService[IO] {
+  def shoppingCartService(itemsService: ItemsService[IO]) = new ShoppingCartService[IO] {
 
     private val refUnsafe = Ref.unsafe[IO, Map[UserId, Cart]](Map.empty)
 
@@ -179,7 +147,7 @@ object DummyServices {
     }
   }
 
-  def checkoutService(implicit s: Supervisor[IO]) = {
+  def checkoutService(shoppingCartService: ShoppingCartService[IO])(implicit s: Supervisor[IO]) = {
     implicit val l = LoggerFactory.getLoggerFromName[IO]("Checkout service")
     implicit val b = Background.bgInstance[IO]
 
