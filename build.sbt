@@ -71,7 +71,8 @@ lazy val app =
     )
     .settings(
       libraryDependencies ++= Seq(
-        Dependencies.TestDependencies.scalaTest
+        Dependencies.TestDependencies.scalaTest,
+        Dependencies.TestDependencies.scalaMock
       ) ++ Seq(
         Dependencies.TestDependencies.testcontainers,
         Dependencies.TestDependencies.weaver

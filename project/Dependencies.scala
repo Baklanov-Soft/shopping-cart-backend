@@ -41,7 +41,7 @@ object Dependencies {
 
     /* Testing */
     val scalaTest           = "3.2.15"
-    val scalaMock           = "3.6.0"
+    val scalaMock           = "5.2.0"
     val testcontainers      = "1.17.6"
     val testcontainersRedis = "1.6.3"
     val weaver              = "0.8.1"
@@ -148,8 +148,8 @@ object Dependencies {
       )
     }.map(_ % "it")
 
-    val scalaTest = "org.scalatest" %% "scalatest"      % Versions.scalaTest % "it,test"
-    val scalaMock = "org.scalamock" %% "scalamock-core" % Versions.scalaMock % "it,test"
+    val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest % "it,test"
+    val scalaMock = "org.scalamock" %% "scalamock" % Versions.scalaMock % "it,test"
 
     val weaver = Seq(
       "com.disneystreaming" %% "weaver-core",
