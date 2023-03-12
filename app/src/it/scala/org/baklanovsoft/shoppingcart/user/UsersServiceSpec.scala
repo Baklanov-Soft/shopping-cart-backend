@@ -1,10 +1,10 @@
 package org.baklanovsoft.shoppingcart.user
 
 import cats.effect.{IO, Resource}
+import org.baklanovsoft.shoppingcart.ResourcesRegistry.Postgres
 import org.baklanovsoft.shoppingcart.user.UsersService.{RoleExists, UserNotFound, UsernameExists}
-import org.baklanovsoft.shoppingcart.user.model.{ChangePassword, CreateUser, Password, Role, Username}
+import org.baklanovsoft.shoppingcart.user.model._
 import org.baklanovsoft.shoppingcart.util.Hash
-import skunk.Session
 import weaver.{GlobalRead, IOSuite, LowPriorityImplicits}
 
 import scala.util.Try
@@ -14,7 +14,7 @@ class UsersServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
 
   override def sharedResource: Resource[IO, Res] =
     global
-      .getOrFailR[Resource[IO, Session[IO]]](None)(classBasedInstance)
+      .getOrFailR[Postgres](None)(classBasedInstance)
       .map(r => UsersService.make[IO](r))
 
   test("User creation and password correctness") { usersService =>

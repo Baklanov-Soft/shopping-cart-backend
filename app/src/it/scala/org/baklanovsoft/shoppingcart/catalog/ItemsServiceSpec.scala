@@ -3,13 +3,13 @@ package org.baklanovsoft.shoppingcart.catalog
 import cats.effect.IO
 import cats.effect.kernel.Resource
 import cats.implicits._
+import org.baklanovsoft.shoppingcart.ResourcesRegistry.Postgres
 import org.baklanovsoft.shoppingcart.catalog.model._
-import skunk.Session
 import squants.market.{EUR, Money, USD}
 import weaver.{GlobalRead, IOSuite, LowPriorityImplicits}
 
 class ItemsServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImplicits {
-  override type Res = Resource[IO, Session[IO]]
+  override type Res = Postgres
 
   override def sharedResource: Resource[IO, Res] =
     global.getOrFailR[Res](None)(classBasedInstance)

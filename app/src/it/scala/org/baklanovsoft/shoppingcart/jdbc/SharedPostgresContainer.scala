@@ -1,9 +1,9 @@
-package org.baklanovsoft.shoppingcart
+package org.baklanovsoft.shoppingcart.jdbc
 
 import cats.effect.std.Console
 import cats.effect.{IO, Resource}
+import org.baklanovsoft.shoppingcart.ResourcesRegistry.Postgres
 import org.baklanovsoft.shoppingcart.config.DatabaseConfig
-import org.baklanovsoft.shoppingcart.jdbc.Database
 import org.testcontainers.containers.PostgreSQLContainer
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
 import weaver.{GlobalResource, GlobalWrite, LowPriorityImplicits}
@@ -39,6 +39,6 @@ object SharedPostgresContainer extends GlobalResource with LowPriorityImplicits 
 
       pool <- migration
 
-      _ <- global.putR(pool)(classBasedInstance)
+      _ <- global.putR[Postgres](pool)(classBasedInstance)
     } yield ()
 }
