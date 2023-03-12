@@ -2,11 +2,11 @@ package org.baklanovsoft.shoppingcart.payment
 import cats.data.NonEmptyList
 import cats.effect.IO
 import cats.effect.kernel.Resource
+import org.baklanovsoft.shoppingcart.ResourcesRegistry.Postgres
 import org.baklanovsoft.shoppingcart.catalog.model._
 import org.baklanovsoft.shoppingcart.payment.model.{CartItem, PaymentId}
 import org.baklanovsoft.shoppingcart.user.UsersService
 import org.baklanovsoft.shoppingcart.user.model.{CreateUser, Password, Username}
-import skunk.Session
 import squants.market.{Money, USD}
 import weaver.{GlobalRead, IOSuite, LowPriorityImplicits}
 
@@ -18,7 +18,7 @@ class OrdersServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpl
 
   override def sharedResource: Resource[IO, Res] =
     global
-      .getOrFailR[Resource[IO, Session[IO]]](None)(classBasedInstance)
+      .getOrFailR[Postgres](None)(classBasedInstance)
       .map { pool =>
         val usersService  = UsersService.make[IO](pool)
         val ordersService = OrdersService.make[IO](pool)
