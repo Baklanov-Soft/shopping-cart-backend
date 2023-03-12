@@ -8,7 +8,7 @@ import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.health.HealthService
 import org.baklanovsoft.shoppingcart.http.HttpServer
 import org.baklanovsoft.shoppingcart.jdbc.Database
-import org.baklanovsoft.shoppingcart.payment.OrdersService
+import org.baklanovsoft.shoppingcart.payment.{OrdersService, ShoppingCartService}
 import org.baklanovsoft.shoppingcart.redis.Redis
 import org.baklanovsoft.shoppingcart.user.{AdminInitService, AuthService, UsersService}
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
@@ -40,7 +40,7 @@ object Main extends IOApp {
     itemsService      = ItemsService.make[IO](pool)
     ordersService     = OrdersService.make[IO](pool)
 
-    shoppingCartService = DummyServices.shoppingCartService(itemsService)
+    shoppingCartService = ShoppingCartService.make[IO](itemsService, redis)
 
     auth = Auth[IO](authService)
 
