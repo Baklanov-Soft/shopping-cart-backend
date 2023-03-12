@@ -40,6 +40,12 @@ object UsersSQL {
          WHERE username = $username
        """.query(userDb)
 
+  val selectUserById: Query[UserId, UserDb] =
+    sql"""
+         SELECT * FROM users
+         WHERE uuid = $userId
+       """.query(userDb)
+
   val insertUser: Command[UserDb] =
     sql"""
          INSERT INTO users
