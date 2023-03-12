@@ -17,7 +17,11 @@ Database:
 - DATABASE_DB - name of the database, should be created before running the service;
 - DATABASE_USER - name of database user;
 - DATABASE_PASSWORD - password of database user;
-- DATABASE_MIGRATE - if set to `false` - app won't do the migration at the start;
+- DATABASE_MIGRATE - if set to `false` - app won't do the migration at the start.
+
+Redis:
+
+- REDIS_URL - url for connection to redis.
 
 Http:
 

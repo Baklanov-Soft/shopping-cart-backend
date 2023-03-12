@@ -58,6 +58,7 @@ lazy val app =
         Dependencies.http4s,
         Dependencies.pureconfig,
         Dependencies.refined,
+        Dependencies.redis4cats,
         Dependencies.skunk,
         Dependencies.tapir
       ).flatten
