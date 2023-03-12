@@ -1,12 +1,12 @@
 package org.baklanovsoft.shoppingcart.catalog.sql
 
 import org.baklanovsoft.shoppingcart.catalog.model._
-import BrandSQL.{brandId, brandName}
-import CategoriesSQL.{categoryId, categoryName}
+import org.baklanovsoft.shoppingcart.catalog.sql.BrandSQL.{brandId, brandName}
+import org.baklanovsoft.shoppingcart.catalog.sql.CategoriesSQL.{categoryId, categoryName}
 import skunk._
 import skunk.codec.all._
 import skunk.implicits._
-import squants.market.{Money, USD}
+import squants.market.{Money, defaultMoneyContext}
 
 object ItemSQL {
 
@@ -20,7 +20,9 @@ object ItemSQL {
     varchar.imap[ItemDescription](ItemDescription.apply)(_.value)
 
   val money =
-    numeric.imap[Money](v => Money(v, USD))(_.amount)
+    (numeric ~ varchar(3)).imap[Money] { case (amount, currency) =>
+      Money(amount, currency)(defaultMoneyContext).toOption.get
+    }(m => (m.amount, m.currency.code))
 
   val decoder: Decoder[Item] =
     (
@@ -47,7 +49,7 @@ object ItemSQL {
 
   private val selectFragment: Fragment[Void] =
     sql"""
-         SELECT i.uuid, i.name, i.description, i.price,
+         SELECT i.uuid, i.name, i.description, i.price, i.currency,
                 b.uuid, b.name, c.uuid, c.name
          FROM items AS i
          INNER JOIN brands AS b ON i.brand_id = b.uuid
@@ -81,10 +83,10 @@ object ItemSQL {
   val updateItem: Command[UpdateItem] =
     sql"""
          UPDATE items
-         SET price = $money
+         SET price = $numeric, currency = ${varchar(3)}
          WHERE uuid = $itemId
        """.command.contramap { i =>
-      i.price ~ i.id
+      i.price.amount ~ i.price.currency.code ~ i.id
     }
 
 }

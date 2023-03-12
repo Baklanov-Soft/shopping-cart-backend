@@ -1,11 +1,11 @@
 package org.baklanovsoft.shoppingcart.catalog
 
-import cats.implicits._
 import cats.effect.IO
 import cats.effect.kernel.Resource
+import cats.implicits._
 import org.baklanovsoft.shoppingcart.catalog.model._
 import skunk.Session
-import squants.market.{Money, USD}
+import squants.market.{EUR, Money, USD}
 import weaver.{GlobalRead, IOSuite, LowPriorityImplicits}
 
 class ItemsServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImplicits {
@@ -53,7 +53,7 @@ class ItemsServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
 
       byId <- (ids1 ++ ids2).traverse(items.findById)
 
-      updatedMoney = Money(99.9, USD)
+      updatedMoney = Money(99.9, EUR)
       _           <- ids1.traverse(i => items.update(UpdateItem(id = i, price = updatedMoney)))
       updated     <- ids1.traverse(items.findById)
 

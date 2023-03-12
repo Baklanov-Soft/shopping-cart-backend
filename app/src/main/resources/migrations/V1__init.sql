@@ -13,6 +13,7 @@ CREATE TABLE items (
     name VARCHAR UNIQUE NOT NULL,
     description VARCHAR NOT NULL,
     price NUMERIC NOT NULL,
+    currency VARCHAR(3) NOT NULL,
     brand_id UUID NOT NULL,
     category_id UUID NOT NULL,
     CONSTRAINT brand_id_fkey FOREIGN KEY (brand_id)
