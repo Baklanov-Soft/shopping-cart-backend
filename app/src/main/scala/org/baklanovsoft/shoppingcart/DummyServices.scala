@@ -1,6 +1,5 @@
 package org.baklanovsoft.shoppingcart
 
-import cats.data.NonEmptyList
 import cats.effect._
 import cats.effect.std.Supervisor
 import cats.implicits._
@@ -108,46 +107,9 @@ object DummyServices {
     ): IO[PaymentId] = IO(PaymentId(UUID.randomUUID()))
   }
 
-  val ordersService = new OrdersService[IO] {
-
-    private val unsafeRef = Ref.unsafe[IO, Map[UserId, List[Order]]](Map.empty)
-
-    override def get(
-        userId: UserId,
-        orderId: OrderId
-    ): IO[Option[Order]] =
-      unsafeRef.get.map(
-        _.get(userId).flatMap(_.find(_.id == orderId))
-      )
-
-    override def findBy(userId: UserId): IO[List[Order]] =
-      unsafeRef.get.map(
-        _.getOrElse(userId, List.empty)
-      )
-
-    override def create(
-        userId: UserId,
-        pid: PaymentId,
-        items: NonEmptyList[CartItem],
-        total: Money
-    ): IO[OrderId] = {
-      val id = OrderId(UUID.randomUUID())
-
-      unsafeRef.update { all =>
-        val o = Order(
-          id,
-          PaymentId(UUID.randomUUID()),
-          items.toList.map(c => c.item.uuid -> c.quantity).toMap,
-          total
-        )
-
-        all.get(userId).map(_ :+ o).fold(all)(o => all.updated(userId, o))
-
-      } >> id.pure[IO]
-    }
-  }
-
-  def checkoutService(shoppingCartService: ShoppingCartService[IO])(implicit s: Supervisor[IO]) = {
+  def checkoutService(shoppingCartService: ShoppingCartService[IO], ordersService: OrdersService[IO])(implicit
+      s: Supervisor[IO]
+  ) = {
     implicit val l = LoggerFactory.getLoggerFromName[IO]("Checkout service")
     implicit val b = Background.bgInstance[IO]
 
