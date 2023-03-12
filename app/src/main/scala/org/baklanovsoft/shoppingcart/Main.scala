@@ -2,67 +2,22 @@ package org.baklanovsoft.shoppingcart
 
 import cats.effect._
 import cats.effect.std.Supervisor
-import com.comcast.ip4s._
 import org.baklanovsoft.shoppingcart.catalog.{BrandsService, CategoriesService, ItemsService}
 import org.baklanovsoft.shoppingcart.config.ApplicationConfig
 import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.health.HealthService
+import org.baklanovsoft.shoppingcart.http.HttpServer
 import org.baklanovsoft.shoppingcart.jdbc.Database
 import org.baklanovsoft.shoppingcart.payment.OrdersService
 import org.baklanovsoft.shoppingcart.user.{AdminInitService, AuthService, UsersService}
-import org.http4s.HttpApp
-import org.http4s.ember.server.EmberServerBuilder
-import org.http4s.server.{Router, Server}
-import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect._
-import sttp.tapir.server.http4s.Http4sServerOptions
-import sttp.tapir.server.interceptor.cors.{CORSConfig, CORSInterceptor}
-import sttp.tapir.server.interceptor.log.DefaultServerLog
-
-import scala.concurrent.duration._
 
 object Main extends IOApp {
 
   private val configR: Resource[IO, ApplicationConfig] =
     Resource.eval(loadConfigF[IO, ApplicationConfig])
-
-  private def serverR(routes: Routes[IO]): Resource[IO, Server] = {
-    val logger = LoggerFactory.getLoggerFromName[IO]("EmberServer")
-
-    val logSettings =
-      DefaultServerLog(
-        doLogWhenReceived = s => logger.debug(s),
-        doLogWhenHandled = (s, t) => t.fold(logger.debug(s))(logger.error(_)(s)),
-        doLogAllDecodeFailures = (s, t) => t.fold(logger.debug(s))(logger.error(_)(s)),
-        doLogExceptions = (s, t) => logger.error(t)(s),
-        noLog = IO.unit
-      )
-
-    val corsSettings =
-      CORSInterceptor
-        .customOrThrow[IO](
-          CORSConfig.default.allowAllOrigins.allowAllHeaders.allowAllMethods
-        )
-
-    val options =
-      Http4sServerOptions
-        .customiseInterceptors[IO]
-        .corsInterceptor(corsSettings)
-        .serverLog(logSettings)
-        .options
-
-    val router: HttpApp[IO] = Router.apply[IO]("/" -> routes.http4sRoutes(options)).orNotFound
-
-    EmberServerBuilder
-      .default[IO]
-      .withHost(ipv4"0.0.0.0")
-      .withPort(port"8080")
-      .withHttpApp(router)
-      .withShutdownTimeout(5.seconds)
-      .build
-  }
 
   private val resource = for {
     implicit0(s: Supervisor[IO]) <- Supervisor[IO]
@@ -105,7 +60,7 @@ object Main extends IOApp {
 
     routes = Routes[IO](health, userController, categories, brands, items, shoppingCart, orders, checkout)
 
-    _ <- serverR(routes)
+    _ <- HttpServer.serverR[IO](config.http, routes)
   } yield ()
 
   override def run(args: List[String]): IO[ExitCode] =
