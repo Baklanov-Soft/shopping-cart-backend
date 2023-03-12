@@ -73,7 +73,10 @@ object Dependencies {
     "tf.tofu" %% "derevo-pureconfig"
   ).map(_ % Versions.derevo)
 
-  val enumeratum = Seq("com.beachape" %% "enumeratum").map(_ % Versions.enumeratum)
+  val enumeratum = Seq(
+    "com.beachape" %% "enumeratum",
+    "com.beachape" %% "enumeratum-circe"
+  ).map(_ % Versions.enumeratum)
 
   val flyway   = "org.flywaydb"        % "flyway-core" % Versions.flyway
   val flyway4s = "com.github.geirolz" %% "fly4s-core"  % Versions.flyway4s
@@ -128,6 +131,7 @@ object Dependencies {
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server",
     "com.softwaremill.sttp.tapir" %% "tapir-newtype",
     "com.softwaremill.sttp.tapir" %% "tapir-refined",
+    "com.softwaremill.sttp.tapir" %% "tapir-enumeratum",
     "com.softwaremill.sttp.tapir" %% "tapir-derevo"
   ).map(_ % Versions.tapir)
 
