@@ -169,7 +169,7 @@ object DummyServices {
         val o = Order(
           id,
           PaymentId(UUID.randomUUID()),
-          items.toList,
+          items.toList.map(c => c.item.uuid -> c.quantity).toMap,
           total
         )
 

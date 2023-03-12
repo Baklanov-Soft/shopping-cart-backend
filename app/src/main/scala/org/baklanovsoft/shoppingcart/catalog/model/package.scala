@@ -23,5 +23,4 @@ package object model {
   @newtype case class ItemDescription(value: String)
 
   @newtype case class Quantity(value: Int)
-
 }

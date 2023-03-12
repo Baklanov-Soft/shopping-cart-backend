@@ -13,7 +13,7 @@ object UsersSQL {
   private val role =
     varchar.imap[Role](Role.withName)(_.entryName)
 
-  private val userId =
+  val userId: Codec[UserId] =
     uuid.imap[UserId](UserId.apply)(_.value)
 
   private val username =

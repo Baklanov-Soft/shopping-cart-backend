@@ -42,5 +42,16 @@ CREATE TABLE roles (
     role VARCHAR NOT NULL,
     UNIQUE (user_uuid, role),
     CONSTRAINT user_uuid_fk FOREIGN KEY (user_uuid) REFERENCES users (uuid)
+);
+
+CREATE TABLE orders(
+    uuid UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    payment_id UUID UNIQUE NOT NULL,
+    items JSONB NOT NULL, -- just a map itemId -> amount
+    total NUMERIC NOT NULL,
+    currency VARCHAR(3) NOT NULL,
+    CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES users(uuid) MATCH SIMPLE
+    ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 
