@@ -8,7 +8,7 @@ import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.health.HealthService
 import org.baklanovsoft.shoppingcart.http.HttpServer
 import org.baklanovsoft.shoppingcart.jdbc.Database
-import org.baklanovsoft.shoppingcart.payment.{CheckoutService, OrdersService, ShoppingCartService}
+import org.baklanovsoft.shoppingcart.payment.{CheckoutService, OrdersService, PaymentService, ShoppingCartService}
 import org.baklanovsoft.shoppingcart.redis.Redis
 import org.baklanovsoft.shoppingcart.user.{AdminInitService, AuthService, UsersService}
 import org.baklanovsoft.shoppingcart.util.{Background, Retry}
@@ -44,8 +44,9 @@ object Main extends IOApp {
     ordersService     = OrdersService.make[IO](pool)
 
     shoppingCartService = ShoppingCartService.make[IO](itemsService, redis)
+    paymentService      = PaymentService.make[IO]
 
-    checkoutService = CheckoutService[IO](DummyServices.paymentService, shoppingCartService, ordersService)
+    checkoutService = CheckoutService[IO](paymentService, shoppingCartService, ordersService)
 
     auth = Auth[IO](authService)
 
