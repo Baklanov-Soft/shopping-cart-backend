@@ -80,13 +80,27 @@ object ItemSQL {
         i.price ~ i.brandId ~ i.categoryId
     }
 
-  val updateItem: Command[UpdateItem] =
+  final case class UpdateItemCommand(
+      id: ItemId,
+      name: ItemName,
+      description: ItemDescription,
+      price: Money,
+      brandId: BrandId,
+      categoryId: CategoryId
+  )
+
+  val updateItem: Command[UpdateItemCommand] =
     sql"""
          UPDATE items
-         SET price = $numeric, currency = ${varchar(3)}
+         SET name = $itemName,
+         description = $itemDesc,
+         price = $numeric, 
+         currency = ${varchar(3)},
+         brand_id = $brandId,
+         category_id = $categoryId
          WHERE uuid = $itemId
        """.command.contramap { i =>
-      i.price.amount ~ i.price.currency.code ~ i.id
+      i.name ~ i.description ~ i.price.amount ~ i.price.currency.code ~ i.brandId ~ i.categoryId ~ i.id
     }
 
 }

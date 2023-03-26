@@ -9,6 +9,7 @@ import org.baklanovsoft.shoppingcart.error.DomainError
 import org.baklanovsoft.shoppingcart.util.GenUUID
 import skunk.Session
 import skunk.implicits._
+import io.scalaland.chimney.dsl._
 
 trait ItemsService[F[_]] {
   def findAll: F[List[Item]]
@@ -72,11 +73,35 @@ object ItemsService {
       } yield id
     )
 
-    override def update(item: UpdateItem): F[Unit] = sessionR.use(s =>
+    override def update(update: UpdateItem): F[Unit] = sessionR.use(s =>
       for {
-        maybeItem <- s.prepare(selectById).flatMap(_.option(item.id))
-        _         <- Concurrent[F].fromOption(maybeItem, ItemNotFound)
-        _         <- s.execute(updateItem, item)
+        maybeItem <- s.prepare(selectById).flatMap(_.option(update.id))
+        item      <- Concurrent[F].fromOption(maybeItem, ItemNotFound)
+
+        updatedItem =
+          item
+            .into[UpdateItemCommand]
+            .withFieldComputed(_.id, _.uuid)
+            .withFieldComputed(_.brandId, _.brand.uuid)
+            .withFieldComputed(_.categoryId, _.category.uuid)
+            .transform
+            .patchUsing(update)
+
+        checkNameConflict =
+          s.prepare(selectByName)
+            .flatMap(_.option(updatedItem.name))
+            .flatMap(name => Concurrent[F].whenA(name.nonEmpty)(ItemNameExists.raiseError[F, Unit]))
+
+        _ <- Concurrent[F].ifM((updatedItem.name == item.name).pure[F])(().pure[F], checkNameConflict)
+
+        cats <- s.execute(CategoriesSQL.selectAll)
+        _    <- Concurrent[F]
+                  .whenA(!cats.exists(_.uuid == updatedItem.categoryId))(Concurrent[F].raiseError(CategoryNotFound))
+
+        brands <- s.execute(BrandSQL.selectAll)
+        _      <- Concurrent[F].whenA(!brands.exists(_.uuid == updatedItem.brandId))(Concurrent[F].raiseError(BrandNotFound))
+
+        _ <- s.execute(updateItem, updatedItem)
       } yield ()
     )
   }

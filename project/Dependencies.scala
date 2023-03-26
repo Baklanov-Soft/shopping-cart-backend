@@ -9,6 +9,8 @@ object Dependencies {
     val catsEffect = "3.4.8"
     val catsRetry  = "3.1.0"
 
+    val chimney = "0.7.2"
+
     val circe = "0.14.4"
 
     val derevo = "0.13.0"
@@ -67,6 +69,8 @@ object Dependencies {
     "io.circe" %% "circe-generic",
     "io.circe" %% "circe-refined"
   ).map(_ % Versions.circe)
+
+  val chimney = "io.scalaland" %% "chimney" % Versions.chimney
 
   val derevo = Seq(
     "tf.tofu" %% "derevo-core",

@@ -28,5 +28,9 @@ final case class CreateItem(
 @derive(codec, schema)
 final case class UpdateItem(
     id: ItemId,
-    price: Money
+    name: Option[ItemName] = None,
+    description: Option[ItemDescription] = None,
+    price: Option[Money] = None,
+    brandId: Option[BrandId] = None,
+    categoryId: Option[CategoryId] = None
 )
