@@ -8,9 +8,10 @@ import org.baklanovsoft.shoppingcart.controller.v1._
 import org.baklanovsoft.shoppingcart.health.HealthService
 import org.baklanovsoft.shoppingcart.http.HttpServer
 import org.baklanovsoft.shoppingcart.jdbc.Database
-import org.baklanovsoft.shoppingcart.payment.OrdersService
+import org.baklanovsoft.shoppingcart.payment.{CheckoutService, OrdersService, PaymentService, ShoppingCartService}
 import org.baklanovsoft.shoppingcart.redis.Redis
 import org.baklanovsoft.shoppingcart.user.{AdminInitService, AuthService, UsersService}
+import org.baklanovsoft.shoppingcart.util.{Background, Retry}
 import org.typelevel.log4cats.slf4j.loggerFactoryforSync
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect._
@@ -22,6 +23,8 @@ object Main extends IOApp {
 
   private val resource = for {
     implicit0(s: Supervisor[IO]) <- Supervisor[IO]
+    implicit0(b: Background[IO])  = Background.bgInstance[IO]
+    implicit0(r: Retry[IO])       = Retry.forLoggerTemporal[IO]
 
     config <- configR
 
@@ -40,7 +43,10 @@ object Main extends IOApp {
     itemsService      = ItemsService.make[IO](pool)
     ordersService     = OrdersService.make[IO](pool)
 
-    shoppingCartService = DummyServices.shoppingCartService(itemsService)
+    shoppingCartService = ShoppingCartService.make[IO](itemsService, redis)
+    paymentService      = PaymentService.make[IO]
+
+    checkoutService = CheckoutService[IO](paymentService, shoppingCartService, ordersService)
 
     auth = Auth[IO](authService)
 
@@ -58,7 +64,7 @@ object Main extends IOApp {
     items      = ItemsController.make[IO](auth, itemsService)
 
     checkout =
-      CheckoutController.make[IO](auth, DummyServices.checkoutService(shoppingCartService, ordersService))
+      CheckoutController.make[IO](auth, checkoutService)
 
     routes = Routes[IO](health, userController, categories, brands, items, shoppingCart, orders, checkout)
 

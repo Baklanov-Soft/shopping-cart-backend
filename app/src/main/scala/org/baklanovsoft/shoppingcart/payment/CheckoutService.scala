@@ -8,17 +8,19 @@ import org.baklanovsoft.shoppingcart.payment.CheckoutService.CheckoutError._
 import org.baklanovsoft.shoppingcart.payment.model._
 import org.baklanovsoft.shoppingcart.user.model._
 import org.baklanovsoft.shoppingcart.util.{Background, Retriable, Retry}
-import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.{Logger, LoggerFactory}
 import retry.RetryPolicies._
 import squants.market.Money
 
 import scala.concurrent.duration._
 
-final case class CheckoutService[F[_]: MonadThrow: Retry: Background: Logger](
+final case class CheckoutService[F[_]: MonadThrow: Retry: Background: LoggerFactory](
     paymentService: PaymentService[F],
     shoppingCartService: ShoppingCartService[F],
     ordersService: OrdersService[F]
 ) {
+
+  implicit private val logger: Logger[F] = LoggerFactory.getLogger[F]
 
   private val retryPolicy =
     limitRetries[F](3) |+| exponentialBackoff[F](10.milliseconds)

@@ -34,15 +34,18 @@ object Dependencies {
     val redis4cats = "1.4.0"
     val refined    = "0.10.1"
 
-    val scalaTest = "3.2.15"
-    val scalaMock = "3.6.0"
-    val skunk     = "0.5.1"
-    val squants   = "1.8.3"
+    val skunk   = "0.5.1"
+    val squants = "1.8.3"
 
-    val tapir          = "1.2.9"
-    val testcontainers = "1.17.6"
+    val tapir = "1.2.9"
 
-    val weaver = "0.8.1"
+    /* Testing */
+    val scalaTest           = "3.2.15"
+    val scalaMock           = "5.2.0"
+    val testcontainers      = "1.17.6"
+    val testcontainersRedis = "1.6.3"
+    val mockitoScala        = "1.17.14"
+    val weaver              = "0.8.1"
   }
 
   val plugins = Seq(
@@ -137,13 +140,22 @@ object Dependencies {
 
   object TestDependencies {
 
-    val testcontainers = Seq(
-      "org.testcontainers" % "testcontainers",
-      "org.testcontainers" % "postgresql"
-    ).map(_ % Versions.testcontainers % "it")
+    val testcontainers = {
+      Seq(
+        "org.testcontainers" % "testcontainers",
+        "org.testcontainers" % "postgresql"
+      ).map(_ % Versions.testcontainers) ++ Seq(
+        "com.redis.testcontainers" % "testcontainers-redis" % Versions.testcontainersRedis
+      )
+    }.map(_ % "it")
 
-    val scalaTest = "org.scalatest" %% "scalatest"      % Versions.scalaTest % "it,test"
-    val scalaMock = "org.scalamock" %% "scalamock-core" % Versions.scalaMock % "it,test"
+    val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest % "it,test"
+    val scalaMock = "org.scalamock" %% "scalamock" % Versions.scalaMock % "it,test"
+
+    val mockitoScala = Seq(
+      "org.mockito" %% "mockito-scala",
+      "org.mockito" %% "mockito-scala-cats"
+    ).map(_ % Versions.mockitoScala % "it,test")
 
     val weaver = Seq(
       "com.disneystreaming" %% "weaver-core",
