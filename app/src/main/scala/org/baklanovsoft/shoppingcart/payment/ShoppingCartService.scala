@@ -38,8 +38,13 @@ object ShoppingCartService {
         itemId: ItemId,
         quantity: Quantity
     ): F[Unit] =
-      redis.hSet(userId.show, itemId.show, quantity.show) *>
-        redis.expire(userId.show, CART_EXPIRATION).void // reset expiration after each cart modification
+      for {
+        maybeExists     <- redis.hGet(userId.show, itemId.show)
+        existingQuantity = maybeExists.fold(Quantity(0))(v => Quantity(v.toInt))
+        newQuantity      = Quantity(existingQuantity.value + quantity.value)
+        _               <- redis.hSet(userId.show, itemId.show, newQuantity.show)
+        _               <- redis.expire(userId.show, CART_EXPIRATION) // reset expiration after each cart modification
+      } yield ()
 
     override def get(
         userId: UserId
@@ -72,16 +77,14 @@ object ShoppingCartService {
     override def update(
         userId: UserId,
         cart: Cart
-    ): F[Unit] = redis.hGetAll(userId.show).flatMap {
-      _.toList.traverse_ { case (k, _) =>
-        GenUUID[F].read(k).map(ItemId.apply).flatMap { id =>
-          cart.items.get(id).traverse_ { q =>
-            redis.hSet(userId.show, k, q.show)
-          }
-        }
-      }
-    } *>
-      redis.expire(userId.show, CART_EXPIRATION).void
+    ): F[Unit] =
+      for {
+        existingItems <- cart.items.toList
+                           .traverseFilter { case (k, q) => itemsService.findById(k).map(_.map(i => i -> q)) }
+        _             <- redis.del(userId.show)
+        _             <- existingItems.traverse { case (k, q) => redis.hSet(userId.show, k.uuid.show, q.show) }
+        _             <- redis.expire(userId.show, CART_EXPIRATION).void
+      } yield ()
 
   }
 }
