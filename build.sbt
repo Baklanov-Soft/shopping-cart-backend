@@ -74,6 +74,7 @@ lazy val app =
         Dependencies.TestDependencies.scalaTest,
         Dependencies.TestDependencies.scalaMock
       ) ++ Seq(
+        Dependencies.TestDependencies.mockitoScala,
         Dependencies.TestDependencies.testcontainers,
         Dependencies.TestDependencies.weaver
       ).flatten

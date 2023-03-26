@@ -44,6 +44,7 @@ object Dependencies {
     val scalaMock           = "5.2.0"
     val testcontainers      = "1.17.6"
     val testcontainersRedis = "1.6.3"
+    val mockitoScala        = "1.17.14"
     val weaver              = "0.8.1"
   }
 
@@ -150,6 +151,11 @@ object Dependencies {
 
     val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest % "it,test"
     val scalaMock = "org.scalamock" %% "scalamock" % Versions.scalaMock % "it,test"
+
+    val mockitoScala = Seq(
+      "org.mockito" %% "mockito-scala",
+      "org.mockito" %% "mockito-scala-cats"
+    ).map(_ % Versions.mockitoScala % "it,test")
 
     val weaver = Seq(
       "com.disneystreaming" %% "weaver-core",
