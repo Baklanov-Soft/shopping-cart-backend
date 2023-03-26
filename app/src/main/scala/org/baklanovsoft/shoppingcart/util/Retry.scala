@@ -3,7 +3,7 @@ package org.baklanovsoft.shoppingcart.util
 import cats.Show
 import cats.effect.Temporal
 import cats.implicits._
-import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.{Logger, LoggerFactory}
 import retry.{RetryDetails, RetryPolicy, retryingOnAllErrors}
 
 sealed trait Retriable
@@ -28,8 +28,10 @@ trait Retry[F[_]] {
 object Retry {
   def apply[F[_]: Retry]: Retry[F] = implicitly
 
-  implicit def forLoggerTemporal[F[_]: Logger: Temporal]: Retry[F] =
+  implicit def forLoggerTemporal[F[_]: LoggerFactory: Temporal]: Retry[F] =
     new Retry[F] {
+      implicit val l: Logger[F] = LoggerFactory.getLogger[F]
+
       override def retry[A](policy: RetryPolicy[F], retriable: Retriable)(fa: F[A]): F[A] = {
         def onError(e: Throwable, details: RetryDetails): F[Unit] =
           details match {
