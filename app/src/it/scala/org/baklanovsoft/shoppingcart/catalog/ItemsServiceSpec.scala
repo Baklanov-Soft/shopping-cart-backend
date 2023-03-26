@@ -53,9 +53,13 @@ class ItemsServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
 
       byId <- (ids1 ++ ids2).traverse(items.findById)
 
-      updatedMoney = Money(99.9, EUR)
-      _           <- ids1.traverse(i => items.update(UpdateItem(id = i, price = updatedMoney)))
-      updated     <- ids1.traverse(items.findById)
+      updatedMoney       = Money(99.9, EUR)
+      updatedDescription = ItemDescription("test 2")
+
+      _       <- ids1.traverse(i =>
+                   items.update(UpdateItem(id = i, price = updatedMoney.some, description = updatedDescription.some))
+                 )
+      updated <- ids1.traverse(items.findById)
 
     } yield expect( // findAll contains every item
       (ids1 ++ ids2).forall(id => findAll.exists(_.uuid == id))
@@ -77,6 +81,12 @@ class ItemsServiceSpec(global: GlobalRead) extends IOSuite with LowPriorityImpli
         expect(
           updated.flatten.length == ids1.length &&
             updated.flatten.map(_.price).forall(_ == updatedMoney)
+        )
+      )
+      .and(         // description is updated
+        expect(
+          updated.flatten.length == ids1.length &&
+            updated.flatten.map(_.description).forall(_ == updatedDescription)
         )
       )
 
