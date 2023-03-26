@@ -84,5 +84,5 @@ lazy val app =
     )
     .settings(
       coverageFailOnMinimum    := true,
-      coverageMinimumStmtTotal := 15
+      coverageMinimumStmtTotal := 40
     )
